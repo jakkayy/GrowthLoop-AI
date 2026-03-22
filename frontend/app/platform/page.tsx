@@ -2,7 +2,6 @@
 
 export default function ConnectLinePage() {
   const lineAddFriendUrl = "https://line.me/R/ti/p/@767aubcx";
-
   return (
     <main className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-md rounded-2xl border p-6 shadow text-center">
@@ -16,6 +15,13 @@ export default function ConnectLinePage() {
           className="block w-full rounded-lg bg-green-500 text-white py-3 font-medium"
         >
           ➕ Add LINE Friend
+        </a>
+
+        <a
+          href="/api/facebook/login"
+          className="mt-4 block w-full rounded-lg bg-blue-600 text-white py-3 font-medium"
+        >
+          Connect Facebook
         </a>
       </div>
     </main>
