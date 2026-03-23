@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { verifyAccessToken } from "@/lib/auth";
 
 type FacebookMeResponse = {
   id: string;
@@ -30,14 +31,17 @@ export async function GET(req: NextRequest) {
   const appSecret = process.env.FACEBOOK_APP_SECRET!;
   const redirectUri = process.env.FACEBOOK_REDIRECT_URI!;
 
-  // ชั่วคราว: เปลี่ยนเป็น user_id จริงจากระบบ auth ของคุณภายหลัง
-  const TEST_USER_ID = "eb52070a-620d-449d-b187-4e2dd4e57a0b";
+  const token = req.cookies.get("access_token")?.value;
+  if (!token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-  if (!TEST_USER_ID) {
-    return NextResponse.json(
-      { error: "Please set TEST_USER_ID in callback route first" },
-      { status: 400 }
-    );
+  let userId: string;
+  try {
+    const payload = verifyAccessToken(token);
+    userId = payload.userId;
+  } catch {
+    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
   // 1) แลก code เป็น user access token
@@ -91,7 +95,7 @@ export async function GET(req: NextRequest) {
     .from("facebook_connections")
     .upsert(
       {
-        user_id: TEST_USER_ID,
+        user_id: userId,
         facebook_user_id: meData.id,
         user_access_token: userAccessToken,
         status: "active",
@@ -114,7 +118,7 @@ export async function GET(req: NextRequest) {
   // 5) upsert facebook_pages
   if (pages.length > 0) {
     const pageRows = pages.map((page) => ({
-      user_id: TEST_USER_ID,
+      user_id: userId,
       facebook_connection_id: connectionRow.id,
       page_id: page.id,
       page_name: page.name,
@@ -140,5 +144,5 @@ export async function GET(req: NextRequest) {
   }
 
   // 6) redirect กลับหน้า dashboard
-  return NextResponse.redirect("http://localhost:3000/facebook");
+  return NextResponse.redirect("http://localhost:3000/dashboard");
 }

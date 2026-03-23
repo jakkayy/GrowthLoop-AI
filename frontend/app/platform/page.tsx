@@ -1,28 +1,29 @@
 "use client";
 
-export default function ConnectLinePage() {
-  const lineAddFriendUrl = "https://line.me/R/ti/p/@767aubcx";
+export default function PlatformPage() {
   return (
     <main className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-md rounded-2xl border p-6 shadow text-center">
-        <h1 className="text-2xl font-bold mb-4">Connect LINE</h1>
+        <h1 className="text-2xl font-bold mb-2">เชื่อมต่อแพลตฟอร์ม</h1>
+        <p className="mb-6 text-sm text-gray-500">
+          เลือกแพลตฟอร์มที่ต้องการเชื่อมต่อกับระบบ
+        </p>
 
-        <p className="mb-6">กรุณาเพิ่มเพื่อน LINE เพื่อเชื่อมต่อระบบ</p>
+        <div className="flex flex-col gap-3">
+          <a
+            href="/api/line/login"
+            className="block w-full rounded-lg bg-[#06C755] text-white py-3 font-medium hover:bg-[#05b04c] transition-colors"
+          >
+            Connect LINE
+          </a>
 
-        <a
-          href={lineAddFriendUrl}
-          target="_blank"
-          className="block w-full rounded-lg bg-green-500 text-white py-3 font-medium"
-        >
-          ➕ Add LINE Friend
-        </a>
-
-        <a
-          href="/api/facebook/login"
-          className="mt-4 block w-full rounded-lg bg-blue-600 text-white py-3 font-medium"
-        >
-          Connect Facebook
-        </a>
+          <a
+            href="/api/facebook/login"
+            className="block w-full rounded-lg bg-[#1877F2] text-white py-3 font-medium hover:bg-[#1669d3] transition-colors"
+          >
+            Connect Facebook
+          </a>
+        </div>
       </div>
     </main>
   );
