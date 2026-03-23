@@ -1,7 +1,23 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import axios from 'axios';
 import { buildReviewFlex } from './flex-message.builder';
 import { DraftsService } from '../drafts/drafts.service';
+
+type LinePostbackEvent = {
+  type: 'postback';
+  replyToken: string;
+  postback: { data: string };
+};
+
+type LineEvent = LinePostbackEvent | { type: string };
+
+type LineWebhookBody = {
+  events: LineEvent[];
+};
 
 @Injectable()
 export class LineService {
@@ -47,27 +63,32 @@ export class LineService {
   }
 
   async replyText(replyToken: string, text: string) {
-    await axios.post(
-      'https://api.line.me/v2/bot/message/reply',
-      {
-        replyToken,
-        messages: [{ type: 'text', text }],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-          'Content-Type': 'application/json',
+    try {
+      await axios.post(
+        'https://api.line.me/v2/bot/message/reply',
+        {
+          replyToken,
+          messages: [{ type: 'text', text }],
         },
-      },
-    );
+        {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+    } catch (error: any) {
+      this.logger.error(`Failed to reply LINE message: ${error?.message}`);
+    }
   }
 
-  async handleWebhook(body: any) {
+  async handleWebhook(body: LineWebhookBody) {
     const events = body.events ?? [];
 
     for (const event of events) {
       if (event.type === 'postback') {
-        const params = new URLSearchParams(event.postback?.data ?? '');
+        const postback = event as LinePostbackEvent;
+        const params = new URLSearchParams(postback.postback?.data ?? '');
         const action = params.get('action');
         const draftId = params.get('draftId');
 
@@ -76,22 +97,29 @@ export class LineService {
         if (action === 'approve') {
           try {
             await this.draftsService.approve(draftId);
-            await this.replyText(event.replyToken, '✅ อนุมัติโพสต์แล้ว จะดำเนินการโพสต์ในเร็วๆ นี้');
+            await this.replyText(
+              postback.replyToken,
+              '✅ อนุมัติโพสต์แล้ว จะดำเนินการโพสต์ในเร็วๆ นี้',
+            );
             this.logger.log(`Draft ${draftId} approved`);
           } catch (err) {
             this.logger.error(`Failed to approve draft ${draftId}: ${err}`);
-            await this.replyText(event.replyToken, '❌ เกิดข้อผิดพลาด กรุณาลองใหม่');
+            await this.replyText(
+              postback.replyToken,
+              '❌ เกิดข้อผิดพลาด กรุณาลองใหม่',
+            );
           }
-        }
-
-        if (action === 'deny') {
+        } else if (action === 'deny') {
           try {
             await this.draftsService.deny(draftId);
-            await this.replyText(event.replyToken, '🚫 ปฏิเสธโพสต์แล้ว');
+            await this.replyText(postback.replyToken, '🚫 ปฏิเสธโพสต์แล้ว');
             this.logger.log(`Draft ${draftId} denied`);
           } catch (err) {
             this.logger.error(`Failed to deny draft ${draftId}: ${err}`);
-            await this.replyText(event.replyToken, '❌ เกิดข้อผิดพลาด กรุณาลองใหม่');
+            await this.replyText(
+              postback.replyToken,
+              '❌ เกิดข้อผิดพลาด กรุณาลองใหม่',
+            );
           }
         }
       }
