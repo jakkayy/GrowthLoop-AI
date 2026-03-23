@@ -80,7 +80,22 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // 3) upsert line_connections
+  // 3) เช็คว่า LINE account นี้ถูก connect กับ user อื่นอยู่หรือเปล่า
+  const { data: existing } = await supabase
+    .from("line_connections")
+    .select("user_id")
+    .eq("line_user_id", profile.userId)
+    .single();
+
+  if (existing && existing.user_id !== userId) {
+    // LINE account นี้ถูกใช้กับ user อื่นแล้ว — ย้าย ownership มาให้ user ปัจจุบัน
+    await supabase
+      .from("line_connections")
+      .delete()
+      .eq("line_user_id", profile.userId);
+  }
+
+  // upsert line_connections
   const { error: upsertError } = await supabase
     .from("line_connections")
     .upsert(

@@ -14,6 +14,7 @@ export async function GET() {
     state,
     scope: "profile openid",
     nonce,
+    prompt: "consent login",
   });
 
   return NextResponse.redirect(
