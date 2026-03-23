@@ -1,10 +1,14 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { buildReviewFlex } from './flex-message.builder';
+import { DraftsService } from '../drafts/drafts.service';
 
 @Injectable()
 export class LineService {
+  private readonly logger = new Logger(LineService.name);
   private readonly token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+
+  constructor(private readonly draftsService: DraftsService) {}
 
   async pushReviewFlex(input: {
     to: string;
@@ -67,18 +71,28 @@ export class LineService {
         const action = params.get('action');
         const draftId = params.get('draftId');
 
+        if (!draftId) continue;
+
         if (action === 'approve') {
-          await this.replyText(
-            event.replyToken,
-            `Approved draft ${draftId ?? ''}`.trim(),
-          );
+          try {
+            await this.draftsService.approve(draftId);
+            await this.replyText(event.replyToken, '✅ อนุมัติโพสต์แล้ว จะดำเนินการโพสต์ในเร็วๆ นี้');
+            this.logger.log(`Draft ${draftId} approved`);
+          } catch (err) {
+            this.logger.error(`Failed to approve draft ${draftId}: ${err}`);
+            await this.replyText(event.replyToken, '❌ เกิดข้อผิดพลาด กรุณาลองใหม่');
+          }
         }
 
         if (action === 'deny') {
-          await this.replyText(
-            event.replyToken,
-            `Denied draft ${draftId ?? ''}`.trim(),
-          );
+          try {
+            await this.draftsService.deny(draftId);
+            await this.replyText(event.replyToken, '🚫 ปฏิเสธโพสต์แล้ว');
+            this.logger.log(`Draft ${draftId} denied`);
+          } catch (err) {
+            this.logger.error(`Failed to deny draft ${draftId}: ${err}`);
+            await this.replyText(event.replyToken, '❌ เกิดข้อผิดพลาด กรุณาลองใหม่');
+          }
         }
       }
     }

@@ -3,9 +3,10 @@ import { ContentService } from './content.service';
 import { AiModule } from '../ai/ai.module';
 import { LineModule } from '../line/line.module';
 import { StorageModule } from '../storage/storage.module';
+import { DraftsModule } from '../drafts/drafts.module';
 
 @Module({
-  imports: [AiModule, LineModule, StorageModule],
+  imports: [AiModule, LineModule, StorageModule, DraftsModule],
   providers: [ContentService],
   exports: [ContentService],
 })
