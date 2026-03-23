@@ -69,7 +69,7 @@ export class AiService {
             },
           ],
         },
-        30000,
+        120000,
       );
 
       const message = data?.choices?.[0]?.message;

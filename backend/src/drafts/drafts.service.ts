@@ -101,6 +101,27 @@ export class DraftsService {
     return data ?? [];
   }
 
+  async getApproved(): Promise<
+    { id: string; user_id: string; caption: string; image_url: string }[]
+  > {
+    const { data, error } = await this.supabase
+      .from('post_drafts')
+      .select('id, user_id, caption, image_url')
+      .eq('status', 'approved');
+
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  }
+
+  async markPosted(draftId: string) {
+    const { error } = await this.supabase
+      .from('post_drafts')
+      .update({ status: 'posted' })
+      .eq('id', draftId);
+
+    if (error) throw new Error(error.message);
+  }
+
   async getAllActiveUsers(): Promise<
     { user_id: string; line_user_id: string }[]
   > {
