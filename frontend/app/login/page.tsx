@@ -35,6 +35,16 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-green-50 flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Back button */}
+      <div className="absolute top-5 left-6 z-20">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-700 transition-colors"
+        >
+          ← กลับหน้าหลัก
+        </Link>
+      </div>
+
       {/* Glow */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <div className="h-[400px] w-[400px] rounded-full bg-green-200/50 blur-[120px]" />
