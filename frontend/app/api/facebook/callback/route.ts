@@ -90,7 +90,23 @@ export async function GET(req: NextRequest) {
 
   const pages = pagesData.data ?? [];
 
-  // 4) upsert facebook_connections
+  // 4) ถ้า Facebook account นี้ถูก connect กับ user อื่น ให้ลบออกก่อน
+  const { data: existingConn } = await supabase
+    .from("facebook_connections")
+    .select("user_id")
+    .eq("facebook_user_id", meData.id)
+    .neq("user_id", userId)
+    .maybeSingle();
+
+  if (existingConn) {
+    await supabase
+      .from("facebook_connections")
+      .delete()
+      .eq("facebook_user_id", meData.id)
+      .neq("user_id", userId);
+  }
+
+  // upsert facebook_connections
   const { data: connectionRow, error: connectionError } = await supabase
     .from("facebook_connections")
     .upsert(

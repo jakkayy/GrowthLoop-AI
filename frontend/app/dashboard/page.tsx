@@ -4,6 +4,13 @@ import { verifyAccessToken } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
+async function logout() {
+  "use server";
+  const cookieStore = await cookies();
+  cookieStore.delete("access_token");
+  redirect("/login");
+}
+
 type User = {
   user_id: string;
   full_name: string;
@@ -134,6 +141,14 @@ export default async function DashboardPage() {
             >
               เชื่อมต่อแพลตฟอร์ม →
             </Link>
+            <form action={logout}>
+              <button
+                type="submit"
+                className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                ออกจากระบบ
+              </button>
+            </form>
           </div>
         </div>
 
