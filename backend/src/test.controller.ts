@@ -7,11 +7,13 @@ export class TestController {
 
   @Get('send-line')
   async sendLine(
+    @Query('lineUserId') lineUserId: string,
     @Query('userId') userId: string,
     @Query('topic') topic: string,
   ) {
     return this.contentService.generateAndSendToLine({
-      lineUserId: userId,
+      lineUserId,
+      userId,
       topic: topic || 'โปรโมทร้านกาแฟเปิดใหม่',
     });
   }

@@ -1,29 +1,73 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { ConfigService } from '@nestjs/config';
 import { AiService } from '../ai/ai.service';
 import { LineService } from '../line/line.service';
 import { StorageService } from '../storage/storage.service';
 import { DraftsService } from '../drafts/drafts.service';
 
+type UserBrandProfile = {
+  business_type: string | null;
+  description: string | null;
+  tone_brand: string | null;
+  ci_color: string | null;
+};
+
 @Injectable()
 export class ContentService {
+  private readonly supabase: SupabaseClient;
+
   constructor(
     private readonly aiService: AiService,
     private readonly lineService: LineService,
     private readonly storageService: StorageService,
     private readonly draftsService: DraftsService,
-  ) {}
+    private readonly config: ConfigService,
+  ) {
+    this.supabase = createClient(
+      this.config.get<string>('SUPABASE_URL')!,
+      this.config.get<string>('SUPABASE_SERVICE_ROLE_KEY')!,
+    );
+  }
+
+  private async getUserBrandProfile(userId: string): Promise<UserBrandProfile> {
+    const { data } = await this.supabase
+      .from('users')
+      .select('business_type, description, tone_brand, ci_color')
+      .eq('user_id', userId)
+      .single();
+    return data ?? { business_type: null, description: null, tone_brand: null, ci_color: null };
+  }
+
+  private buildCaptionPrompt(topic: string, profile: UserBrandProfile): string {
+    const lines = [`เขียนแคปชั่นภาษาไทยสำหรับโพสต์หัวข้อ: ${topic}`];
+    if (profile.business_type) lines.push(`ประเภทธุรกิจ: ${profile.business_type}`);
+    if (profile.description) lines.push(`รายละเอียดธุรกิจ: ${profile.description}`);
+    if (profile.tone_brand) lines.push(`โทนเสียงแบรนด์: ${profile.tone_brand}`);
+    if (profile.ci_color) lines.push(`สีประจำแบรนด์: ${profile.ci_color}`);
+    return lines.join('\n');
+  }
+
+  private buildImagePrompt(caption: string, profile: UserBrandProfile): string {
+    const lines = [`Create a clean social media promotional image for: ${caption}`];
+    if (profile.business_type) lines.push(`Business type: ${profile.business_type}`);
+    if (profile.tone_brand) lines.push(`Brand tone: ${profile.tone_brand}`);
+    if (profile.ci_color) lines.push(`Brand colors: ${profile.ci_color}`);
+    return lines.join('. ');
+  }
 
   // generate + บันทึก DB (ใช้โดย scheduler ตี 6)
   async generateAndSave(input: { userId: string; lineUserId: string; topic?: string }) {
     const topic = input.topic ?? 'โปรโมทสินค้าและบริการ';
+    const profile = await this.getUserBrandProfile(input.userId);
 
     const { caption } = await this.aiService.generateCaption(
-      `เขียนแคปชั่นภาษาไทยสำหรับโพสต์หัวข้อ: ${topic}`,
+      this.buildCaptionPrompt(topic, profile),
     );
 
     const { imageDataUrl } = await this.aiService.generateImage(
-      `Create a clean social media promotional image for: ${caption}`,
+      this.buildImagePrompt(caption, profile),
     );
 
     const imageUrl =
@@ -40,13 +84,17 @@ export class ContentService {
   }
 
   // generate + ส่ง LINE ทันที (ใช้สำหรับ test)
-  async generateAndSendToLine(input: { lineUserId: string; topic: string }) {
+  async generateAndSendToLine(input: { lineUserId: string; topic: string; userId?: string }) {
+    const profile = input.userId
+      ? await this.getUserBrandProfile(input.userId)
+      : { business_type: null, description: null, tone_brand: null, ci_color: null };
+
     const { caption } = await this.aiService.generateCaption(
-      `เขียนแคปชั่นภาษาไทยสำหรับโพสต์หัวข้อ: ${input.topic}`,
+      this.buildCaptionPrompt(input.topic, profile),
     );
 
     const { imageDataUrl } = await this.aiService.generateImage(
-      `Create a clean social media promotional image for: ${caption}`,
+      this.buildImagePrompt(caption, profile),
     );
 
     const imageUrl =

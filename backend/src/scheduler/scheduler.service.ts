@@ -44,7 +44,7 @@ export class SchedulerService {
           });
 
         this.logger.log(`Generated draft ${draftId} for user ${user.user_id}`);
-
+        
         await this.lineService.pushReviewFlex({
           to: user.line_user_id,
           draftId,
