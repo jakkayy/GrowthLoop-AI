@@ -5,6 +5,13 @@ import { LineService } from '../line/line.service';
 import { DraftsService } from '../drafts/drafts.service';
 import { FacebookPostService } from '../facebook/facebook-post.service';
 
+function currentHHMM(): string {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  return `${hh}:${mm}`;
+}
+
 @Injectable()
 export class SchedulerService {
   private readonly logger = new Logger(SchedulerService.name);
@@ -16,69 +23,55 @@ export class SchedulerService {
     private readonly facebookPostService: FacebookPostService,
   ) {}
 
-  // ทุกวัน 06:00 — generate content สำหรับ user ทุกคน
-  @Cron('0 6 * * *')
-  // @Cron('27 22 * * *')
-  async generateDailyContent() {
-    this.logger.log('=== [06:00] Generating daily content ===');
+  // ทุก 1 นาที — เช็ค user ที่ถึงเวลา generate แล้วส่ง LINE ให้อนุมัติ
+  @Cron('* * * * *')
+  async generateAndSendBySchedule() {
+    const now = currentHHMM();
     const users = await this.draftsService.getAllActiveUsers();
-    this.logger.log(`Found ${users.length} active users`);
+    const targets = users.filter((u) => u.generate_time === now);
+    if (targets.length === 0) return;
 
-    for (const user of users) {
+    this.logger.log(
+      `[${now}] Generating content for ${targets.length} user(s)`,
+    );
+
+    for (const user of targets) {
       try {
-        await this.contentService.generateAndSave({
-          userId: user.user_id,
-          lineUserId: user.line_user_id,
-        });
-        this.logger.log(`Generated draft for user ${user.user_id}`);
-      } catch (err) {
-        this.logger.error(
-          `Failed to generate for user ${user.user_id}: ${err}`,
-        );
-      }
-    }
-  }
+        const { draftId, caption, imageUrl } =
+          await this.contentService.generateAndSave({
+            userId: user.user_id,
+            lineUserId: user.line_user_id,
+          });
 
-  // ทุกวัน 08:00 — ส่ง flex message หาทุก draft ที่ยังไม่ได้ส่ง
-  @Cron('0 8 * * *')
-  // @Cron('28 22 * * *')
-  async sendPendingDrafts() {
-    this.logger.log('=== [08:00] Sending pending drafts ===');
-    const drafts = await this.draftsService.getPendingUnsent();
-    this.logger.log(`Found ${drafts.length} unsent drafts`);
+        this.logger.log(`Generated draft ${draftId} for user ${user.user_id}`);
 
-    for (const draft of drafts) {
-      try {
         await this.lineService.pushReviewFlex({
-          to: draft.line_user_id,
-          draftId: draft.id,
-          caption: draft.caption,
-          imageUrl: draft.image_url,
+          to: user.line_user_id,
+          draftId,
+          caption,
+          imageUrl,
         });
-        await this.draftsService.markSent(draft.id);
-        this.logger.log(`Sent draft ${draft.id}`);
+        await this.draftsService.markSent(draftId);
+        this.logger.log(`Sent draft ${draftId} to LINE`);
       } catch (err) {
-        this.logger.error(`Failed to send draft ${draft.id}: ${err}`);
+        this.logger.error(`Failed for user ${user.user_id}: ${String(err)}`);
       }
     }
   }
 
-  // ทุก 5 นาที — expire draft ที่เลยเวลา 2 ชม. แล้ว
-  @Cron('*/5 * * * *')
-  async expireOverdueDrafts() {
-    await this.draftsService.expireOverdue();
-  }
+  // ทุก 1 นาที — เช็ค user ที่ถึงเวลา post แล้วโพสต์ Facebook
+  @Cron('* * * * *')
+  async postBySchedule() {
+    const now = currentHHMM();
+    const drafts = await this.draftsService.getApprovedWithSchedule();
+    const targets = drafts.filter((d) => d.post_time === now);
+    if (targets.length === 0) return;
 
-  // ทุกวัน 10:00 — โพสต์ draft ที่ approved แล้ว
-  // @Cron('*/5 * * * *')
-  @Cron('0 10 * * *')
-  async postApprovedDrafts() {
-    const drafts = await this.draftsService.getApproved();
-    if (drafts.length === 0) return;
+    this.logger.log(
+      `[${now}] Posting ${targets.length} approved draft(s) to Facebook`,
+    );
 
-    this.logger.log(`Found ${drafts.length} approved drafts to post`);
-
-    for (const draft of drafts) {
+    for (const draft of targets) {
       try {
         await this.facebookPostService.postToPages({
           userId: draft.user_id,
@@ -91,5 +84,11 @@ export class SchedulerService {
         this.logger.error(`Failed to post draft ${draft.id}: ${String(err)}`);
       }
     }
+  }
+
+  // ทุก 5 นาที — expire draft ที่เลยเวลา 2 ชม. แล้ว
+  @Cron('*/5 * * * *')
+  async expireOverdueDrafts() {
+    await this.draftsService.expireOverdue();
   }
 }

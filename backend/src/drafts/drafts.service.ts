@@ -123,14 +123,39 @@ export class DraftsService {
   }
 
   async getAllActiveUsers(): Promise<
-    { user_id: string; line_user_id: string }[]
+    { user_id: string; line_user_id: string; generate_time: string; post_time: string }[]
   > {
     const { data, error } = await this.supabase
       .from('line_connections')
-      .select('user_id, line_user_id')
+      .select('user_id, line_user_id, users!inner(generate_time, post_time)')
       .eq('status', 'active');
 
     if (error) throw new Error(error.message);
-    return data ?? [];
+
+    return (data ?? []).map((row: any) => ({
+      user_id: row.user_id,
+      line_user_id: row.line_user_id,
+      generate_time: row.users?.generate_time ?? '06:00',
+      post_time: row.users?.post_time ?? '10:00',
+    }));
+  }
+
+  async getApprovedWithSchedule(): Promise<
+    { id: string; user_id: string; caption: string; image_url: string; post_time: string }[]
+  > {
+    const { data, error } = await this.supabase
+      .from('post_drafts')
+      .select('id, user_id, caption, image_url, users!inner(post_time)')
+      .eq('status', 'approved');
+
+    if (error) throw new Error(error.message);
+
+    return (data ?? []).map((row: any) => ({
+      id: row.id,
+      user_id: row.user_id,
+      caption: row.caption,
+      image_url: row.image_url,
+      post_time: row.users?.post_time ?? '10:00',
+    }));
   }
 }

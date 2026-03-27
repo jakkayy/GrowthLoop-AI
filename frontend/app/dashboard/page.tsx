@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { verifyAccessToken } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import ScheduleForm from "./ScheduleForm";
 
 async function logout() {
   "use server";
@@ -23,6 +24,8 @@ type User = {
   ci_color: string;
   market_goal: string;
   created_at: string;
+  generate_time: string;
+  post_time: string;
 };
 
 type LineConnection = {
@@ -62,7 +65,7 @@ async function getUser(): Promise<User> {
   const { data, error } = await supabase
     .from("users")
     .select(
-      "user_id, full_name, email, brand_name, business_type, description, target, tone_brand, ci_color, market_goal, created_at"
+      "user_id, full_name, email, brand_name, business_type, description, target, tone_brand, ci_color, market_goal, created_at, generate_time, post_time"
     )
     .eq("user_id", userId)
     .single();
@@ -247,6 +250,11 @@ export default async function DashboardPage() {
             </div>
           </div>
         </div>
+
+        <ScheduleForm
+          initialGenerateTime={user.generate_time ?? "06:00"}
+          initialPostTime={user.post_time ?? "10:00"}
+        />
 
       </div>
     </main>
