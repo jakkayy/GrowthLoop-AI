@@ -15,6 +15,7 @@ export async function GET() {
     scope: "profile openid",
     nonce,
     prompt: "consent login",
+    bot_prompt: "aggressive",
   });
 
   return NextResponse.redirect(
