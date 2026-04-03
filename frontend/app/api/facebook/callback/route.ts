@@ -160,5 +160,5 @@ export async function GET(req: NextRequest) {
   }
 
   // 6) redirect กลับหน้า dashboard
-  return NextResponse.redirect("http://localhost:3000/dashboard");
+  return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard`);
 }
