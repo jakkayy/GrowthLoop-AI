@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { verifyAccessToken } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import UserSidebar from "@/components/UserSidebar";
 import ScheduleForm from "./ScheduleForm";
 import CompetitorsSection from "./CompetitorsSection";
 import OwnPageInsightsSection from "./OwnPageInsightsSection";
@@ -141,64 +142,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-
-      {/* ── Sidebar ── */}
-      <aside className="w-56 shrink-0 bg-white flex flex-col border-r border-gray-200">
-
-        {/* Logo */}
-        <div className="px-5 pt-6 pb-5 border-b border-gray-100">
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-lg bg-green-600 flex items-center justify-center">
-              <span className="text-white text-sm font-bold">A</span>
-            </div>
-            <div>
-              <p className="text-gray-900 text-sm font-bold leading-tight">AXIS</p>
-              <p className="text-[10px] text-green-600/70 tracking-widest">AI MARKETING</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5">
-          {/* Overview — active */}
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-green-50 border border-green-200 text-green-700"
-          >
-            <span className="w-4 h-4 shrink-0"><GridIcon /></span>
-            <span className="text-sm font-medium">Overview</span>
-          </Link>
-          {/* Subscription */}
-          <Link
-            href="/dashboard/subscription"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors"
-          >
-            <span className="w-4 h-4 shrink-0"><SubscriptionIcon /></span>
-            <span className="text-sm">Subscription</span>
-          </Link>
-          {/* Connect Platform */}
-          <Link
-            href="/platform"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors"
-          >
-            <span className="w-4 h-4 shrink-0"><PlatformIcon /></span>
-            <span className="text-sm">Connect Platform</span>
-          </Link>
-        </nav>
-
-        {/* Bottom */}
-        <div className="px-3 pb-5 border-t border-gray-100 pt-4">
-          <form action={logout}>
-            <button
-              type="submit"
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors"
-            >
-              <span className="w-4 h-4 shrink-0"><LogoutIcon /></span>
-              <span className="text-sm">Log Out</span>
-            </button>
-          </form>
-        </div>
-      </aside>
+      <UserSidebar activePage="overview" logoutAction={logout} />
 
       {/* ── Main ── */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -401,42 +345,6 @@ export default async function DashboardPage() {
   );
 }
 
-// ── Icons ──────────────────────────────────────────────────────────────────
-
-function GridIcon() {
-  return (
-    <svg viewBox="0 0 16 16" fill="currentColor">
-      <rect x="1" y="1" width="6" height="6" rx="1.5" />
-      <rect x="9" y="1" width="6" height="6" rx="1.5" />
-      <rect x="1" y="9" width="6" height="6" rx="1.5" />
-      <rect x="9" y="9" width="6" height="6" rx="1.5" />
-    </svg>
-  );
-}
-function PlatformIcon() {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <rect x="1" y="3" width="14" height="10" rx="2" />
-      <path d="M5 8h6M8 5v6" strokeLinecap="round" />
-    </svg>
-  );
-}
-function SubscriptionIcon() {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="1" y="3" width="14" height="10" rx="2" />
-      <path d="M1 6h14" />
-      <path d="M5 10h3M10 10h1" />
-    </svg>
-  );
-}
-function LogoutIcon() {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l3-3-3-3M13 8H6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 function SearchIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
