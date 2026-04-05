@@ -39,7 +39,6 @@ export default function CompetitorsSection() {
     fetchCompetitors();
   }, [fetchCompetitors]);
 
-  // Poll every 6 seconds when any job is running
   useEffect(() => {
     const hasRunning = competitors.some((c) =>
       c.competitor_scrape_jobs.some((j) => j.status === "running")
@@ -89,9 +88,7 @@ export default function CompetitorsSection() {
       next.delete(competitor.id);
       return next;
     });
-    if (res.ok) {
-      fetchCompetitors();
-    }
+    if (res.ok) fetchCompetitors();
   };
 
   const latestJob = (c: Competitor): ScrapeJob | null => {
@@ -102,35 +99,38 @@ export default function CompetitorsSection() {
   };
 
   const jobBadge = (job: ScrapeJob | null) => {
-    if (!job) return <span className="text-xs text-gray-400">ยังไม่เคย scrape</span>;
+    if (!job)
+      return <span className="text-xs text-gray-600">ยังไม่เคย scrape</span>;
     if (job.status === "running")
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded-full">
-          <span className="h-1.5 w-1.5 rounded-full bg-yellow-500 animate-pulse" />
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-2 py-0.5 rounded-full">
+          <span className="h-1.5 w-1.5 rounded-full bg-yellow-400 animate-pulse" />
           กำลัง scrape...
         </span>
       );
     if (job.status === "failed")
-      return <span className="text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">ล้มเหลว</span>;
+      return (
+        <span className="text-xs font-medium text-red-400 bg-red-400/10 border border-red-400/20 px-2 py-0.5 rounded-full">
+          ล้มเหลว
+        </span>
+      );
     return (
-      <span className="text-xs font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+      <span className="text-xs font-medium text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-0.5 rounded-full">
         สำเร็จ · {job.posts_count ?? 0} โพสต์
       </span>
     );
   };
 
   return (
-    <div className="rounded-2xl border border-green-100 bg-white p-6 shadow-sm">
-      <h2 className="mb-1 text-sm font-semibold text-gray-500 uppercase tracking-wide">
-        คู่แข่ง Facebook
-      </h2>
-      <p className="mb-5 text-xs text-gray-400">
-        เพิ่มลิงก์เพจ Facebook คู่แข่ง ระบบจะดึงโพสต์และคอมเม้นต์ 7 วันล่าสุดอัตโนมัติทุกสัปดาห์
+    <div className="rounded-2xl bg-[#161b22] border border-white/[0.08] p-6">
+      <h2 className="text-sm font-semibold text-white mb-0.5">วิเคราะห์คู่แข่ง (Facebook Competitor)</h2>
+      <p className="text-xs text-gray-500 mb-5">
+        เพิ่มลิงก์เพจ Facebook คู่แข่ง · ดึงโพสต์และคอมเม้นต์ 7 วันล่าสุด · AI วิเคราะห์อัตโนมัติทุกสัปดาห์
       </p>
 
       {/* Add form */}
-      <div className="mb-5 rounded-xl border border-gray-100 bg-gray-50 p-4 space-y-3">
-        <p className="text-xs font-medium text-gray-600">เพิ่มคู่แข่งใหม่</p>
+      <div className="mb-5 rounded-xl bg-white/[0.04] border border-white/[0.06] p-4 space-y-3">
+        <p className="text-xs font-medium text-gray-400">เพิ่มคู่แข่งใหม่</p>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
             <label className="text-xs text-gray-500">ชื่อเพจ</label>
@@ -139,7 +139,7 @@ export default function CompetitorsSection() {
               placeholder="เช่น ร้านกาแฟ ABC"
               value={pageName}
               onChange={(e) => setPageName(e.target.value)}
-              className="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+              className="rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -149,20 +149,20 @@ export default function CompetitorsSection() {
               placeholder="https://www.facebook.com/pagename"
               value={pageUrl}
               onChange={(e) => setPageUrl(e.target.value)}
-              className="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+              className="rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition"
             />
           </div>
         </div>
         <div className="flex items-center justify-between">
           {addError ? (
-            <p className="text-xs text-red-500">{addError}</p>
+            <p className="text-xs text-red-400">{addError}</p>
           ) : (
             <span />
           )}
           <button
             onClick={handleAdd}
             disabled={addLoading}
-            className="rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-colors shadow-sm"
+            className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-50 transition-colors"
           >
             {addLoading ? "กำลังเพิ่ม..." : "+ เพิ่มคู่แข่ง"}
           </button>
@@ -171,7 +171,7 @@ export default function CompetitorsSection() {
 
       {/* Competitor list */}
       {competitors.length === 0 ? (
-        <p className="text-center text-sm text-gray-400 py-6">ยังไม่มีคู่แข่ง</p>
+        <p className="text-center text-sm text-gray-600 py-6">ยังไม่มีคู่แข่ง</p>
       ) : (
         <div className="space-y-3">
           {competitors.map((c) => {
@@ -180,33 +180,33 @@ export default function CompetitorsSection() {
             return (
               <div
                 key={c.id}
-                className="rounded-xl border border-gray-100 bg-gray-50 p-4"
+                className="rounded-xl bg-white/[0.04] border border-white/[0.06] p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#1877F2] text-white text-xs font-bold shadow-sm">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#1877F2]/20 text-[#4a9eff] text-xs font-bold border border-[#1877F2]/20">
                       f
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{c.page_name}</p>
+                      <p className="text-sm font-semibold text-white truncate">{c.page_name}</p>
                       <a
                         href={c.page_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-blue-500 hover:underline truncate block"
+                        className="text-xs text-gray-500 hover:text-emerald-400 truncate block transition-colors"
                       >
                         {c.page_url}
                       </a>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                     {jobBadge(job)}
                     {job?.status === "completed" && job.result_url && (
                       <a
                         href={job.result_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="rounded-lg border border-green-200 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-50 transition-colors"
+                        className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-emerald-400 hover:border-emerald-500/30 transition-colors"
                       >
                         ดูผล
                       </a>
@@ -214,21 +214,21 @@ export default function CompetitorsSection() {
                     <button
                       onClick={() => handleScrape(c)}
                       disabled={isScraping}
-                      className="rounded-lg bg-blue-50 border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 disabled:opacity-50 transition-colors"
+                      className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 text-xs font-medium text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50 transition-colors"
                     >
                       {isScraping ? "กำลัง scrape..." : "Scrape Now"}
                     </button>
                     <button
                       onClick={() => handleDelete(c.id)}
                       disabled={isScraping}
-                      className="rounded-lg border border-red-100 px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 disabled:opacity-40 transition-colors"
+                      className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-red-400 hover:border-red-400/30 disabled:opacity-40 transition-colors"
                     >
                       ลบ
                     </button>
                   </div>
                 </div>
                 {job?.status === "completed" && job.completed_at && (
-                  <p className="mt-2 text-xs text-gray-400">
+                  <p className="mt-2 text-xs text-gray-600">
                     อัปเดตล่าสุด:{" "}
                     {new Date(job.completed_at).toLocaleDateString("th-TH", {
                       year: "numeric",

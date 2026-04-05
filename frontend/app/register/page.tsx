@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+const INPUT = "w-full rounded-xl bg-white border border-gray-200 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition";
+const LABEL = "mb-1.5 block text-sm font-medium text-gray-700";
+
 export default function RegisterPage() {
   const router = useRouter();
 
@@ -18,7 +21,6 @@ export default function RegisterPage() {
   const [brandColor, setBrandColor] = useState("");
   const [productDetails, setProductDetails] = useState("");
   const [marketingGoal, setMarketingGoal] = useState("");
-  const [numericGoal, setNumericGoal] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -59,19 +61,16 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="min-h-screen bg-green-50 flex items-center justify-center p-6 relative overflow-hidden">
+    <main className="min-h-screen bg-gray-50 flex items-center justify-center p-6 relative overflow-hidden">
       {/* Back button */}
       <div className="absolute top-5 left-6 z-20">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-700 transition-colors"
-        >
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-600 transition-colors">
           ← กลับหน้าหลัก
         </Link>
       </div>
 
       {/* Glow */}
-      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-[300px] w-[600px] rounded-full bg-green-200/40 blur-[120px]" />
+      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-[300px] w-[600px] rounded-full bg-green-200/50 blur-[120px]" />
 
       <div className="relative z-10 w-full max-w-2xl py-8">
         {/* Logo */}
@@ -82,7 +81,7 @@ export default function RegisterPage() {
           <span className="text-lg font-bold text-gray-900">AXIS</span>
         </div>
 
-        <div className="rounded-2xl border border-green-100 bg-white p-8 shadow-lg shadow-green-100">
+        <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
           <h1 className="mb-1 text-2xl font-bold text-gray-900">สมัครสมาชิก</h1>
           <p className="mb-8 text-sm text-gray-500">กรอกข้อมูลบัญชีและข้อมูลแบรนด์ของคุณ</p>
 
@@ -91,87 +90,50 @@ export default function RegisterPage() {
             <div>
               <div className="flex items-center gap-3 mb-5">
                 <div className="h-6 w-6 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-bold">1</div>
-                <h2 className="text-base font-semibold text-gray-800">ข้อมูลบัญชี</h2>
+                <h2 className="text-base font-semibold text-gray-900">ข้อมูลบัญชี</h2>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700">ชื่อ</label>
-                  <input
-                    type="text"
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="ชื่อของคุณ"
-                    required
-                  />
+                  <label className={LABEL}>ชื่อ</label>
+                  <input type="text" className={INPUT} value={name} onChange={(e) => setName(e.target.value)} placeholder="ชื่อของคุณ" required />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700">อีเมล</label>
-                    <input
-                      type="email"
-                      className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@example.com"
-                      required
-                    />
+                    <label className={LABEL}>อีเมล</label>
+                    <input type="email" className={INPUT} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700">รหัสผ่าน</label>
-                    <input
-                      type="password"
-                      className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="อย่างน้อย 6 ตัวอักษร"
-                      required
-                      minLength={6}
-                    />
+                    <label className={LABEL}>รหัสผ่าน</label>
+                    <input type="password" className={INPUT} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="อย่างน้อย 6 ตัวอักษร" required minLength={6} />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Divider */}
             <div className="border-t border-gray-100" />
 
             {/* Brand Section */}
             <div>
               <div className="flex items-center gap-3 mb-5">
                 <div className="h-6 w-6 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-bold">2</div>
-                <h2 className="text-base font-semibold text-gray-800">ข้อมูลแบรนด์</h2>
+                <h2 className="text-base font-semibold text-gray-900">ข้อมูลแบรนด์</h2>
               </div>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700">ชื่อแบรนด์</label>
-                    <input
-                      type="text"
-                      className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                      value={brandName}
-                      onChange={(e) => setBrandName(e.target.value)}
-                      placeholder="เช่น NovaBrand"
-                      required
-                    />
+                    <label className={LABEL}>ชื่อแบรนด์</label>
+                    <input type="text" className={INPUT} value={brandName} onChange={(e) => setBrandName(e.target.value)} placeholder="เช่น NovaBrand" required />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700">ประเภทธุรกิจ</label>
-                    <input
-                      type="text"
-                      className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                      value={businessType}
-                      onChange={(e) => setBusinessType(e.target.value)}
-                      placeholder="เช่น ร้านอาหาร, ความงาม"
-                      required
-                    />
+                    <label className={LABEL}>ประเภทธุรกิจ</label>
+                    <input type="text" className={INPUT} value={businessType} onChange={(e) => setBusinessType(e.target.value)} placeholder="เช่น ร้านอาหาร, ความงาม" required />
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700">คำอธิบายธุรกิจ</label>
+                  <label className={LABEL}>คำอธิบายธุรกิจ</label>
                   <textarea
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition resize-none"
+                    className={`${INPUT} resize-none`}
                     value={businessDescription}
                     onChange={(e) => setBusinessDescription(e.target.value)}
                     placeholder="อธิบายธุรกิจของคุณโดยย่อ"
@@ -181,46 +143,25 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700">กลุ่มเป้าหมาย</label>
-                  <input
-                    type="text"
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                    value={targetAudience}
-                    onChange={(e) => setTargetAudience(e.target.value)}
-                    placeholder="เช่น ผู้หญิงอายุ 25-35 ปี ที่รักสุขภาพ"
-                    required
-                  />
+                  <label className={LABEL}>กลุ่มเป้าหมาย</label>
+                  <input type="text" className={INPUT} value={targetAudience} onChange={(e) => setTargetAudience(e.target.value)} placeholder="เช่น ผู้หญิงอายุ 25-35 ปี ที่รักสุขภาพ" required />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700">โทนแบรนด์</label>
-                    <input
-                      type="text"
-                      className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                      value={brandTone}
-                      onChange={(e) => setBrandTone(e.target.value)}
-                      placeholder="เช่น เป็นมิตร, มืออาชีพ"
-                      required
-                    />
+                    <label className={LABEL}>โทนแบรนด์</label>
+                    <input type="text" className={INPUT} value={brandTone} onChange={(e) => setBrandTone(e.target.value)} placeholder="เช่น เป็นมิตร, มืออาชีพ" required />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700">สี CI / Brand Identity</label>
-                    <input
-                      type="text"
-                      className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                      value={brandColor}
-                      onChange={(e) => setBrandColor(e.target.value)}
-                      placeholder="เช่น #FF5733, ฟ้า-ขาว"
-                      required
-                    />
+                    <label className={LABEL}>สี CI / Brand Identity</label>
+                    <input type="text" className={INPUT} value={brandColor} onChange={(e) => setBrandColor(e.target.value)} placeholder="เช่น #FF5733, ฟ้า-ขาว" required />
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700">รายละเอียดสินค้า/บริการ</label>
+                  <label className={LABEL}>รายละเอียดสินค้า/บริการ</label>
                   <textarea
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition resize-none"
+                    className={`${INPUT} resize-none`}
                     value={productDetails}
                     onChange={(e) => setProductDetails(e.target.value)}
                     placeholder="อธิบายสินค้าหรือบริการหลักของคุณ"
@@ -237,10 +178,10 @@ export default function RegisterPage() {
                         key={goal}
                         type="button"
                         onClick={() => setMarketingGoal(goal)}
-                        className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
+                        className={`rounded-full px-5 py-2 text-sm font-medium transition-colors border ${
                           marketingGoal === goal
-                            ? "bg-green-600 text-white border border-green-600"
-                            : "bg-white text-gray-600 border border-gray-200 hover:border-green-300 hover:text-green-700"
+                            ? "bg-green-600 text-white border-green-600"
+                            : "bg-white text-gray-500 border-gray-200 hover:border-green-400 hover:text-green-600"
                         }`}
                       >
                         {goal}
@@ -248,23 +189,11 @@ export default function RegisterPage() {
                     ))}
                   </div>
                 </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700">เป้าหมายเชิงตัวเลข</label>
-                  <input
-                    type="text"
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                    value={numericGoal}
-                    onChange={(e) => setNumericGoal(e.target.value)}
-                    placeholder="เช่น awareness 200K ภายใน 3 เดือน"
-                    required
-                  />
-                </div>
               </div>
             </div>
 
             {errorMessage && (
-              <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3">
+              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3">
                 <p className="text-sm text-red-600">{errorMessage}</p>
               </div>
             )}
@@ -272,7 +201,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-green-600 text-white px-4 py-3 font-medium hover:bg-green-700 disabled:opacity-50 transition-colors shadow-md shadow-green-200"
+              className="w-full rounded-xl bg-green-600 text-white px-4 py-3 font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
             >
               {loading ? "กำลังสมัครสมาชิก..." : "สมัครสมาชิก"}
             </button>

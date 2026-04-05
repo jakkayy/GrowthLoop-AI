@@ -34,12 +34,12 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-green-50 flex items-center justify-center p-6 relative overflow-hidden">
+    <main className="min-h-screen bg-gray-50 flex items-center justify-center p-6 relative overflow-hidden">
       {/* Back button */}
       <div className="absolute top-5 left-6 z-20">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-700 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-600 transition-colors"
         >
           ← กลับหน้าหลัก
         </Link>
@@ -59,7 +59,7 @@ export default function LoginPage() {
           <span className="text-lg font-bold text-gray-900">AXIS</span>
         </div>
 
-        <div className="rounded-2xl border border-green-100 bg-white p-8 shadow-lg shadow-green-100">
+        <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
           <h1 className="mb-1 text-2xl font-bold text-gray-900">เข้าสู่ระบบ</h1>
           <p className="mb-6 text-sm text-gray-500">ยินดีต้อนรับกลับมา</p>
 
@@ -68,7 +68,7 @@ export default function LoginPage() {
               <label className="mb-1.5 block text-sm font-medium text-gray-700">อีเมล</label>
               <input
                 type="email"
-                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                className="w-full rounded-xl bg-white border border-gray-200 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
@@ -80,7 +80,7 @@ export default function LoginPage() {
               <label className="mb-1.5 block text-sm font-medium text-gray-700">รหัสผ่าน</label>
               <input
                 type="password"
-                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                className="w-full rounded-xl bg-white border border-gray-200 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="รหัสผ่านของคุณ"
@@ -89,7 +89,7 @@ export default function LoginPage() {
             </div>
 
             {errorMessage && (
-              <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3">
+              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3">
                 <p className="text-sm text-red-600">{errorMessage}</p>
               </div>
             )}
@@ -97,7 +97,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-green-600 text-white px-4 py-3 font-medium hover:bg-green-700 disabled:opacity-50 transition-colors shadow-md shadow-green-200"
+              className="w-full rounded-xl bg-green-600 text-white px-4 py-3 font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
             >
               {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
             </button>

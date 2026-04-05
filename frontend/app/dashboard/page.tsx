@@ -52,7 +52,6 @@ type FacebookConnection = {
 async function getUser(): Promise<User> {
   const cookieStore = await cookies();
   const token = cookieStore.get("access_token")?.value;
-
   if (!token) redirect("/login");
 
   let userId: string;
@@ -72,7 +71,6 @@ async function getUser(): Promise<User> {
     .single();
 
   if (error || !data) redirect("/login");
-
   return data as User;
 }
 
@@ -115,14 +113,10 @@ async function getFacebookConnection(userId: string): Promise<FacebookConnection
   return { ...conn, pages: pages ?? [] };
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">{label}</span>
-      <span className="text-sm text-gray-800">{value || "-"}</span>
-    </div>
-  );
-}
+const NAV_ITEMS = [
+  { label: "Overview", icon: <GridIcon />, href: "/dashboard" },
+  { label: "Connect Platform", icon: <PlatformIcon />, href: "/platform" },
+];
 
 export default async function DashboardPage() {
   const user = await getUser();
@@ -138,174 +132,340 @@ export default async function DashboardPage() {
     day: "numeric",
   });
 
+  const initials = user.full_name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+
+  const insightLines = insights
+    ? insights.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => l.replace(/^[-•*\d.]+\s*/, ""))
+    : [];
+
   return (
-    <main className="min-h-screen bg-green-50 p-6">
-      <div className="mx-auto max-w-3xl space-y-5">
+    <div className="flex h-screen overflow-hidden bg-[#0d1117]">
 
-        {/* Navbar */}
-        <div className="flex items-center justify-between bg-white rounded-2xl border border-green-100 px-5 py-3.5 shadow-sm">
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-green-600 flex items-center justify-center">
-              <span className="text-white text-xs font-bold">A</span>
+      {/* ── Sidebar ── */}
+      <aside className="w-56 shrink-0 bg-[#0a0d12] flex flex-col border-r border-white/[0.06]">
+
+        {/* Logo */}
+        <div className="px-5 pt-6 pb-5 border-b border-white/5">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-emerald-500 flex items-center justify-center">
+              <span className="text-white text-sm font-bold">A</span>
             </div>
-            <span className="text-base font-bold text-gray-900">AXIS</span>
+            <div>
+              <p className="text-white text-sm font-bold leading-tight">AXIS</p>
+              <p className="text-[10px] text-emerald-400/70 tracking-widest">AI MARKETING</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/platform"
-              className="rounded-full bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors"
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 px-3 py-4 space-y-0.5">
+          {/* Overview — active */}
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
+          >
+            <span className="w-4 h-4 shrink-0"><GridIcon /></span>
+            <span className="text-sm font-medium">Overview</span>
+          </Link>
+          {/* Connect Platform */}
+          <Link
+            href="/platform"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-emerald-400 hover:bg-emerald-500/5 transition-colors"
+          >
+            <span className="w-4 h-4 shrink-0"><PlatformIcon /></span>
+            <span className="text-sm">Connect Platform</span>
+          </Link>
+        </nav>
+
+        {/* Bottom */}
+        <div className="px-3 pb-5 border-t border-white/5 pt-4">
+          <form action={logout}>
+            <button
+              type="submit"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-red-400 hover:bg-red-500/5 transition-colors"
             >
-              Platform →
-            </Link>
-            <form action={logout}>
-              <button
-                type="submit"
-                className="rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-colors"
-              >
-                logout
-              </button>
-            </form>
-          </div>
+              <span className="w-4 h-4 shrink-0"><LogoutIcon /></span>
+              <span className="text-sm">Log Out</span>
+            </button>
+          </form>
         </div>
+      </aside>
 
-        {/* Welcome Banner */}
-        <div className="rounded-2xl bg-gradient-to-br from-green-600 to-emerald-700 p-6 text-white relative overflow-hidden">
-          <div className="pointer-events-none absolute right-0 top-0 h-40 w-40 rounded-full bg-white/10 blur-[60px]" />
-          <div className="relative z-10">
-            <p className="text-green-100 text-sm mb-1">สวัสดี 👋</p>
-            <h1 className="text-2xl font-bold">{user.full_name}</h1>
-            <p className="text-green-200 text-xs mt-1">สมาชิกตั้งแต่ {joinedDate}</p>
+      {/* ── Main ── */}
+      <div className="flex-1 flex flex-col min-w-0">
+
+        {/* Top bar */}
+        <header className="h-14 bg-[#0d1117] border-b border-white/[0.06] flex items-center px-6 gap-4 shrink-0">
+          <div className="flex-1">
+            <h1 className="text-base font-semibold text-white">Overview</h1>
           </div>
-        </div>
-
-        {/* Account Card */}
-        <div className="rounded-2xl border border-green-100 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-sm font-semibold text-gray-500 uppercase tracking-wide">ข้อมูลบัญชี</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <InfoRow label="ชื่อ" value={user.full_name} />
-            <InfoRow label="อีเมล" value={user.email} />
+          {/* Search (decorative) */}
+          <div className="hidden sm:flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 w-52">
+            <SearchIcon className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+            <span className="text-xs text-gray-500">Search insights...</span>
           </div>
-        </div>
-
-        {/* Brand Card */}
-        <div className="rounded-2xl border border-green-100 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-sm font-semibold text-gray-500 uppercase tracking-wide">ข้อมูลแบรนด์</h2>
-          <div className="grid grid-cols-2 gap-5">
-            <InfoRow label="ชื่อแบรนด์" value={user.brand_name} />
-            <InfoRow label="ประเภทธุรกิจ" value={user.business_type} />
-            <div className="col-span-2">
-              <InfoRow label="คำอธิบายธุรกิจ" value={user.description} />
-            </div>
-            <div className="col-span-2">
-              <InfoRow label="กลุ่มเป้าหมาย" value={user.target} />
-            </div>
-            <InfoRow label="โทนแบรนด์" value={user.tone_brand} />
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">สี CI / Brand Identity</span>
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-4 w-4 rounded-full border border-gray-200 shadow-sm"
-                  style={{ backgroundColor: user.ci_color.startsWith("#") ? user.ci_color : undefined }}
-                />
-                <span className="text-sm text-gray-800">{user.ci_color || "-"}</span>
-              </div>
-            </div>
-            <InfoRow label="เป้าหมายการตลาด" value={user.market_goal} />
+          {/* Avatar */}
+          <div className="h-8 w-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+            {initials}
           </div>
-        </div>
+        </header>
 
-        {/* Platforms Card */}
-        <div className="rounded-2xl border border-green-100 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-sm font-semibold text-gray-500 uppercase tracking-wide">แพลตฟอร์มที่เชื่อมต่อ</h2>
-          <div className="space-y-3">
-            {/* LINE */}
-            <div className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 p-4 hover:border-green-200 hover:bg-green-50 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#06C755] text-white text-sm font-bold shadow-sm">
-                  L
+        {/* Content */}
+        <main className="flex-1 p-6 space-y-5 overflow-y-auto">
+
+          {/* Welcome Banner */}
+          <div className="rounded-2xl bg-gradient-to-br from-[#0d1117] to-[#1a2332] p-6 text-white relative overflow-hidden">
+            <div className="pointer-events-none absolute right-0 top-0 h-48 w-48 rounded-full bg-emerald-500/10 blur-[60px]" />
+            <div className="pointer-events-none absolute left-1/3 bottom-0 h-32 w-32 rounded-full bg-emerald-400/5 blur-[40px]" />
+            <div className="relative z-10 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 text-xl font-bold shrink-0">
+                  {initials}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">LINE</p>
-                  {lineConn ? (
-                    <p className="text-xs text-gray-500">{lineConn.display_name}</p>
-                  ) : (
-                    <p className="text-xs text-gray-400">ยังไม่ได้เชื่อมต่อ</p>
-                  )}
-                </div>
-              </div>
-              <span className={`text-xs font-medium px-3 py-1 rounded-full ${lineConn ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-                {lineConn ? "เชื่อมต่อแล้ว" : "ไม่ได้เชื่อมต่อ"}
-              </span>
-            </div>
-
-            {/* Facebook */}
-            <div className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 p-4 hover:border-green-200 hover:bg-green-50 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1877F2] text-white text-sm font-bold shadow-sm">
-                  f
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">Facebook</p>
-                  {fbConn ? (
-                    <p className="text-xs text-gray-500">
-                      {fbConn.pages.length > 0
-                        ? fbConn.pages.map((p) => p.page_name).join(", ")
-                        : "ไม่มีเพจ"}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-gray-400">ยังไม่ได้เชื่อมต่อ</p>
-                  )}
-                </div>
-              </div>
-              <span className={`text-xs font-medium px-3 py-1 rounded-full ${fbConn ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-                {fbConn ? "เชื่อมต่อแล้ว" : "ไม่ได้เชื่อมต่อ"}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <ScheduleForm
-          initialGenerateTime={user.generate_time ?? "06:00"}
-          initialPostTime={user.post_time ?? "10:00"}
-        />
-
-        {/* Competitor Insights */}
-        <div className="rounded-2xl border border-green-100 bg-white p-6 shadow-sm">
-          <h2 className="mb-1 text-sm font-semibold text-gray-500 uppercase tracking-wide">
-            แนวทางการสร้างคอนเทนต์
-          </h2>
-          <p className="mb-4 text-xs text-gray-400">
-            วิเคราะห์จากข้อมูลคู่แข่ง · ระบบใช้แนวทางนี้ในการสร้างโพสต์อัตโนมัติ
-          </p>
-          {insights ? (
-            <ul className="space-y-2">
-              {insights
-                .split("\n")
-                .map((line) => line.trim())
-                .filter(Boolean)
-                .map((line, i) => (
-                  <li key={i} className="flex gap-2.5 text-sm text-gray-700 leading-relaxed">
-                    <span className="mt-0.5 h-5 w-5 shrink-0 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-xs">
-                      {i + 1}
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                      AI STRATEGY ACTIVE
                     </span>
-                    <span>{line.replace(/^[-•*]\s*/, "")}</span>
-                  </li>
-                ))}
-            </ul>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                <span className="text-gray-400 text-lg">?</span>
+                  </div>
+                  <h1 className="text-xl font-bold text-white">คุณ {user.full_name}</h1>
+                  <p className="text-xs text-gray-400 mt-0.5">สมาชิกตั้งแต่ {joinedDate}</p>
+                </div>
               </div>
-              <p className="text-sm text-gray-500">ยังไม่มีแนวทาง</p>
-              <p className="text-xs text-gray-400 mt-1">เพิ่มคู่แข่งและกด Scrape Now เพื่อให้ AI วิเคราะห์</p>
+              <button className="shrink-0 text-xs font-medium text-gray-300 border border-white/10 rounded-xl px-4 py-2 hover:bg-white/5 transition-colors">
+                แก้ไขโปรไฟล์
+              </button>
             </div>
-          )}
-        </div>
+          </div>
 
-        <CompetitorsSection />
+          {/* 2-col grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 items-start">
 
+            {/* ── Left column ── */}
+            <div className="lg:col-span-3 space-y-5">
+
+              {/* Brand Identity */}
+              <div className="rounded-2xl bg-[#161b22] border border-white/[0.08] p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <h2 className="text-sm font-semibold text-white">ข้อมูลแบรนด์และอัตลักษณ์</h2>
+                    <p className="text-xs text-gray-500 mt-0.5">กำหนดลักษณะของคอนเทนต์ตามแบรนด์ของคุณ</p>
+                  </div>
+                  <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                    <span className="text-emerald-400 text-xs">✓</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-5">
+                  <div>
+                    <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-1.5">ชื่อแบรนด์</p>
+                    <p className="text-sm font-semibold text-white">{user.brand_name || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-1.5">ประเภทธุรกิจ</p>
+                    <p className="text-sm text-gray-300">{user.business_type || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-1.5">Tone of Voice</p>
+                    <span className="inline-block text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
+                      {user.tone_brand || "-"}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-1.5">Brand Palette</p>
+                    <div className="flex items-center gap-2">
+                      {user.ci_color?.startsWith("#") ? (
+                        <>
+                          <div
+                            className="h-5 w-5 rounded-md border border-white/10"
+                            style={{ backgroundColor: user.ci_color }}
+                          />
+                          <span className="text-xs text-gray-400">{user.ci_color}</span>
+                        </>
+                      ) : (
+                        <span className="text-sm text-gray-300">{user.ci_color || "-"}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-1.5">กลุ่มเป้าหมาย</p>
+                    <p className="text-sm text-gray-300">{user.target || "-"}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-1.5">เป้าหมายการตลาด</p>
+                    <p className="text-sm text-gray-300">{user.market_goal || "-"}</p>
+                  </div>
+                </div>
+
+                {/* Connected platforms */}
+                <div className="border-t border-white/[0.06] pt-4">
+                  <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-3">แพลตฟอร์มที่เชื่อมต่อ</p>
+                  <div className="flex gap-2 flex-wrap">
+                    <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-medium ${lineConn ? "bg-[#06C755]/10 border-[#06C755]/20 text-[#06C755]" : "bg-white/5 border-white/10 text-gray-500"}`}>
+                      <span className="h-4 w-4 rounded bg-[#06C755] flex items-center justify-center text-white text-[9px] font-bold">L</span>
+                      LINE OA · {lineConn ? lineConn.display_name : "ไม่ได้เชื่อมต่อ"}
+                    </div>
+                    <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-medium ${fbConn ? "bg-[#1877F2]/10 border-[#1877F2]/20 text-[#4a9eff]" : "bg-white/5 border-white/10 text-gray-500"}`}>
+                      <span className="h-4 w-4 rounded bg-[#1877F2] flex items-center justify-center text-white text-[9px] font-bold">f</span>
+                      Facebook Page · {fbConn ? (fbConn.pages[0]?.page_name ?? "เชื่อมต่อแล้ว") : "ไม่ได้เชื่อมต่อ"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Schedule */}
+              <ScheduleForm
+                initialGenerateTime={user.generate_time ?? "06:00"}
+                initialPostTime={user.post_time ?? "10:00"}
+              />
+
+              {/* Competitors */}
+              <CompetitorsSection />
+            </div>
+
+            {/* ── Right column ── */}
+            <div className="lg:col-span-2 space-y-5">
+
+              {/* AI Strategy Guidelines */}
+              <div className="rounded-2xl bg-[#161b22] border border-white/[0.08] p-6">
+                <div className="mb-5">
+                  <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full tracking-wide">
+                    AI STRATEGY GUIDELINES
+                  </span>
+                  <h2 className="text-sm font-semibold text-white mt-2">แนวทางการทำ Content</h2>
+                  <p className="text-xs text-gray-500 mt-0.5">วิเคราะห์จากข้อมูลคู่แข่ง · ใช้ใน prompt อัตโนมัติ</p>
+                </div>
+
+                {insightLines.length > 0 ? (
+                  <div className="space-y-2.5">
+                    {insightLines.map((line, i) => {
+                      const num = String(i + 1).padStart(2, "0");
+                      const colonIdx = line.indexOf(":");
+                      const hasColon = colonIdx > 0 && colonIdx < 40;
+                      const title = hasColon ? line.substring(0, colonIdx).trim() : line;
+                      const desc = hasColon ? line.substring(colonIdx + 1).trim() : "";
+                      return (
+                        <div key={i} className="flex gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+                          <span className="text-xs font-bold text-emerald-400 shrink-0 mt-0.5 w-5">{num}</span>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-gray-200 leading-snug">{title}</p>
+                            {desc && <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{desc}</p>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-10 text-center">
+                    <div className="h-12 w-12 rounded-2xl bg-white/5 flex items-center justify-center mb-3">
+                      <span className="text-2xl">🤖</span>
+                    </div>
+                    <p className="text-sm font-medium text-gray-400">ยังไม่มีแนวทาง</p>
+                    <p className="text-xs text-gray-600 mt-1">เพิ่มคู่แข่งแล้วกด Scrape Now<br />เพื่อให้ AI วิเคราะห์</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Account info (compact) */}
+              <div className="rounded-2xl bg-[#161b22] border border-white/[0.08] p-5">
+                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">ข้อมูลบัญชี</h2>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">ชื่อ</span>
+                    <span className="text-xs font-medium text-gray-300">{user.full_name}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">อีเมล</span>
+                    <span className="text-xs font-medium text-gray-300 truncate max-w-[160px]">{user.email}</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </main>
       </div>
-    </main>
+    </div>
+  );
+}
+
+// ── Icons ──────────────────────────────────────────────────────────────────
+
+function GridIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="currentColor">
+      <rect x="1" y="1" width="6" height="6" rx="1.5" />
+      <rect x="9" y="1" width="6" height="6" rx="1.5" />
+      <rect x="1" y="9" width="6" height="6" rx="1.5" />
+      <rect x="9" y="9" width="6" height="6" rx="1.5" />
+    </svg>
+  );
+}
+function DiamondIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M8 1.5l4.5 4-4.5 9-4.5-9z" />
+    </svg>
+  );
+}
+function TargetIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="8" cy="8" r="6" />
+      <circle cx="8" cy="8" r="3" />
+      <circle cx="8" cy="8" r="0.75" fill="currentColor" />
+    </svg>
+  );
+}
+function CompetitorIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M3 13V7M8 13V3M13 13V9" strokeLinecap="round" />
+    </svg>
+  );
+}
+function SettingsIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="8" cy="8" r="2.5" />
+      <path d="M8 1v1.5M8 13.5V15M15 8h-1.5M2.5 8H1M12.7 3.3l-1.05 1.05M4.35 11.65l-1.05 1.05M12.7 12.7l-1.05-1.05M4.35 4.35L3.3 3.3" strokeLinecap="round" />
+    </svg>
+  );
+}
+function PlatformIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="1" y="3" width="14" height="10" rx="2" />
+      <path d="M5 8h6M8 5v6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function HelpIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="8" cy="8" r="6.5" />
+      <path d="M6 6.5a2 2 0 013.5 1.5c0 1.5-1.5 1.5-1.5 3" strokeLinecap="round" />
+      <circle cx="8" cy="12" r="0.75" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+function LogoutIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l3-3-3-3M13 8H6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="7" cy="7" r="4.5" />
+      <path d="M10.5 10.5l3 3" strokeLinecap="round" />
+    </svg>
   );
 }
