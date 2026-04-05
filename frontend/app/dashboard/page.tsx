@@ -168,6 +168,14 @@ export default async function DashboardPage() {
             <span className="w-4 h-4 shrink-0"><GridIcon /></span>
             <span className="text-sm font-medium">Overview</span>
           </Link>
+          {/* Subscription */}
+          <Link
+            href="/dashboard/subscription"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors"
+          >
+            <span className="w-4 h-4 shrink-0"><SubscriptionIcon /></span>
+            <span className="text-sm">Subscription</span>
+          </Link>
           {/* Connect Platform */}
           <Link
             href="/platform"
@@ -410,6 +418,15 @@ function PlatformIcon() {
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
       <rect x="1" y="3" width="14" height="10" rx="2" />
       <path d="M5 8h6M8 5v6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function SubscriptionIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1" y="3" width="14" height="10" rx="2" />
+      <path d="M1 6h14" />
+      <path d="M5 10h3M10 10h1" />
     </svg>
   );
 }
