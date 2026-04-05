@@ -76,6 +76,17 @@ async function getUser(): Promise<User> {
   return data as User;
 }
 
+async function getLatestInsights(userId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from("competitor_insights")
+    .select("content")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+  return data?.content ?? null;
+}
+
 async function getLineConnection(userId: string): Promise<LineConnection | null> {
   const { data } = await supabase
     .from("line_connections")
@@ -115,9 +126,10 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 export default async function DashboardPage() {
   const user = await getUser();
-  const [lineConn, fbConn] = await Promise.all([
+  const [lineConn, fbConn, insights] = await Promise.all([
     getLineConnection(user.user_id),
     getFacebookConnection(user.user_id),
+    getLatestInsights(user.user_id),
   ]);
 
   const joinedDate = new Date(user.created_at).toLocaleDateString("th-TH", {
@@ -256,6 +268,40 @@ export default async function DashboardPage() {
           initialGenerateTime={user.generate_time ?? "06:00"}
           initialPostTime={user.post_time ?? "10:00"}
         />
+
+        {/* Competitor Insights */}
+        <div className="rounded-2xl border border-green-100 bg-white p-6 shadow-sm">
+          <h2 className="mb-1 text-sm font-semibold text-gray-500 uppercase tracking-wide">
+            แนวทางการสร้างคอนเทนต์
+          </h2>
+          <p className="mb-4 text-xs text-gray-400">
+            วิเคราะห์จากข้อมูลคู่แข่ง · ระบบใช้แนวทางนี้ในการสร้างโพสต์อัตโนมัติ
+          </p>
+          {insights ? (
+            <ul className="space-y-2">
+              {insights
+                .split("\n")
+                .map((line) => line.trim())
+                .filter(Boolean)
+                .map((line, i) => (
+                  <li key={i} className="flex gap-2.5 text-sm text-gray-700 leading-relaxed">
+                    <span className="mt-0.5 h-5 w-5 shrink-0 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-xs">
+                      {i + 1}
+                    </span>
+                    <span>{line.replace(/^[-•*]\s*/, "")}</span>
+                  </li>
+                ))}
+            </ul>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                <span className="text-gray-400 text-lg">?</span>
+              </div>
+              <p className="text-sm text-gray-500">ยังไม่มีแนวทาง</p>
+              <p className="text-xs text-gray-400 mt-1">เพิ่มคู่แข่งและกด Scrape Now เพื่อให้ AI วิเคราะห์</p>
+            </div>
+          )}
+        </div>
 
         <CompetitorsSection />
 

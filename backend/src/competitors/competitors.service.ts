@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import axios from 'axios';
 import { ApifyService, ApifyPost, ApifyComment } from './apify.service';
+import { AiService } from '../ai/ai.service';
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -39,6 +41,7 @@ export class CompetitorsService {
   constructor(
     private readonly config: ConfigService,
     private readonly apify: ApifyService,
+    private readonly aiService: AiService,
   ) {
     this.supabase = createClient(
       this.config.get<string>('SUPABASE_URL')!,
@@ -113,8 +116,9 @@ export class CompetitorsService {
     jobId: string,
     competitorId: string,
     pageUrl: string,
+    userId: string,
   ): void {
-    this.runScrape(jobId, competitorId, pageUrl).catch((err) => {
+    this.runScrape(jobId, competitorId, pageUrl, userId).catch((err) => {
       this.logger.error(`Scrape job ${jobId} failed: ${String(err)}`);
       this.failJob(jobId, String(err)).catch(() => {});
     });
@@ -124,6 +128,7 @@ export class CompetitorsService {
     jobId: string,
     competitorId: string,
     pageUrl: string,
+    userId: string,
   ): Promise<void> {
     this.logger.log(`[Job ${jobId}] Starting posts scrape for ${pageUrl}`);
 
@@ -276,6 +281,81 @@ export class CompetitorsService {
     this.logger.log(
       `[Job ${jobId}] Completed: ${groupedPosts.length} posts saved`,
     );
+
+    // 9. Analyze all competitors for this user and save insights
+    this.analyzeAndSaveInsights(userId, competitorId).catch((err) => {
+      this.logger.error(`analyzeAndSaveInsights failed: ${String(err)}`);
+    });
+  }
+
+  private async analyzeAndSaveInsights(
+    userId: string,
+    triggeredByCompetitorId: string,
+  ): Promise<void> {
+    // ดึง result_url ล่าสุดของทุกคู่แข่งใน user นี้
+    const { data: jobs } = await this.supabase
+      .from('competitor_scrape_jobs')
+      .select('result_url, competitors!inner(page_name, user_id)')
+      .eq('status', 'completed')
+      .eq('competitors.user_id', userId)
+      .not('result_url', 'is', null)
+      .order('completed_at', { ascending: false });
+
+    if (!jobs || jobs.length === 0) return;
+
+    // เก็บแค่ job ล่าสุดต่อ competitor
+    const seen = new Set<string>();
+    const latestJobs = jobs.filter((j: any) => {
+      const name = j.competitors?.page_name ?? '';
+      if (seen.has(name)) return false;
+      seen.add(name);
+      return true;
+    });
+
+    // ดาวน์โหลด JSON และสร้าง summary
+    const summaryParts: string[] = [];
+    for (const job of latestJobs) {
+      const pageName = (job as any).competitors?.page_name ?? 'คู่แข่ง';
+      try {
+        const { data: resultData } = await axios.get<ScrapeResult>(
+          job.result_url,
+        );
+        const postsText = resultData.posts
+          .map((p, i) => {
+            const excerpt = p.text.substring(0, 150).replace(/\n/g, ' ');
+            const topComments = p.comments
+              .slice(0, 3)
+              .map((c) => `  - "${c.text.substring(0, 80)}"`)
+              .join('\n');
+            return (
+              `โพสต์ ${i + 1} (likes: ${p.likes_count}, comments: ${p.comments_count}, shares: ${p.shares_count}):\n` +
+              `"${excerpt}"\n` +
+              (topComments ? `คอมเม้นต์:\n${topComments}` : '')
+            );
+          })
+          .join('\n\n');
+        summaryParts.push(`=== ${pageName} ===\n${postsText}`);
+      } catch {
+        // ข้าม competitor ที่ดาวน์โหลดไม่ได้
+      }
+    }
+
+    if (summaryParts.length === 0) return;
+
+    this.logger.log(
+      `[Insights] Analyzing ${summaryParts.length} competitor(s) for user ${userId}`,
+    );
+
+    const { insights } = await this.aiService.analyzeCompetitorInsights(
+      summaryParts.join('\n\n'),
+    );
+
+    await this.supabase.from('competitor_insights').insert({
+      user_id: userId,
+      content: insights,
+    });
+
+    this.logger.log(`[Insights] Saved for user ${userId}`);
   }
 
   private async failJob(jobId: string, reason: string): Promise<void> {
@@ -308,7 +388,7 @@ export class CompetitorsService {
     for (const comp of competitors ?? []) {
       try {
         const jobId = await this.createScrapeJob(comp.id, comp.user_id);
-        this.triggerScrape(jobId, comp.id, comp.page_url);
+        this.triggerScrape(jobId, comp.id, comp.page_url, comp.user_id);
       } catch (err) {
         this.logger.error(
           `Failed to start scrape for competitor ${comp.id}: ${String(err)}`,

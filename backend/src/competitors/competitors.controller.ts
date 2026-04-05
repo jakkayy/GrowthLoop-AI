@@ -45,7 +45,7 @@ export class CompetitorsController {
       competitorId,
       body.userId,
     );
-    this.competitors.triggerScrape(jobId, competitorId, body.pageUrl);
+    this.competitors.triggerScrape(jobId, competitorId, body.pageUrl, body.userId);
     return { jobId };
   }
 }

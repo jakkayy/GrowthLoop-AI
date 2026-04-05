@@ -56,6 +56,33 @@ export class AiService {
     }
   }
 
+  async analyzeCompetitorInsights(summary: string): Promise<{ insights: string }> {
+    try {
+      const data = await this.postToOpenRouter({
+        model: this.config.get<string>('OPENROUTER_CAPTION_MODEL'),
+        messages: [
+          {
+            role: 'system',
+            content:
+              'คุณคือนักวิเคราะห์การตลาดดิจิทัลผู้เชี่ยวชาญ Facebook Content Strategy\n\nหน้าที่ของคุณคือวิเคราะห์โพสต์และคอมเม้นต์จากเพจ Facebook ของคู่แข่ง แล้วให้แนวทางเชิงกลยุทธ์เพื่อช่วยให้แบรนด์ลูกค้าสร้างคอนเทนต์ที่ดีกว่าและชนะคู่แข่ง\n\n[สิ่งที่ต้องวิเคราะห์]\n- โพสต์ไหนได้ engagement (likes/comments/shares) สูงสุด และเพราะอะไร\n- รูปแบบ/ธีมของคอนเทนต์ที่คนตอบสนองดี\n- โทนและสไตล์การเขียนที่ใช้ได้ผล\n- ช่องว่างหรือจุดอ่อนของคู่แข่งที่สามารถใช้ประโยชน์ได้\n\n[รูปแบบผลลัพธ์]\nตอบเป็นแนวทางการสร้างคอนเทนต์ภาษาไทย เขียนให้กระชับ ชัดเจน และนำไปใช้ได้ทันที\nใช้รูปแบบ bullet points ไม่เกิน 8 ข้อ แต่ละข้อต้องบอกชัดว่า "ทำอะไร" และ "เพราะอะไร"\nไม่ต้องมีคำนำหรือสรุปท้าย ให้เริ่มที่แนวทางเลย',
+          },
+          {
+            role: 'user',
+            content: `วิเคราะห์ข้อมูลคู่แข่งต่อไปนี้และให้แนวทางการสร้างคอนเทนต์:\n\n${summary}`,
+          },
+        ],
+      });
+
+      const insights = data?.choices?.[0]?.message?.content;
+      if (typeof insights !== 'string' || !insights.trim()) {
+        throw new InternalServerErrorException('Insights not returned');
+      }
+      return { insights: insights.trim() };
+    } catch (error) {
+      this.handleAiError(error, 'Analyze competitor insights failed');
+    }
+  }
+
   async generateImage(prompt: string): Promise<{ imageDataUrl: string }> {
     try {
       const data = await this.postToOpenRouter(

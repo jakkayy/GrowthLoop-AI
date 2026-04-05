@@ -40,12 +40,30 @@ export class ContentService {
     return data ?? { business_type: null, description: null, tone_brand: null, ci_color: null };
   }
 
-  private buildCaptionPrompt(topic: string, profile: UserBrandProfile): string {
+  private async getLatestInsights(userId: string): Promise<string | null> {
+    const { data } = await this.supabase
+      .from('competitor_insights')
+      .select('content')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    return data?.content ?? null;
+  }
+
+  private buildCaptionPrompt(
+    topic: string,
+    profile: UserBrandProfile,
+    insights: string | null,
+  ): string {
     const lines = [`เขียนแคปชั่นภาษาไทยสำหรับโพสต์หัวข้อ: ${topic}`];
     if (profile.business_type) lines.push(`ประเภทธุรกิจ: ${profile.business_type}`);
     if (profile.description) lines.push(`รายละเอียดธุรกิจ: ${profile.description}`);
     if (profile.tone_brand) lines.push(`โทนเสียงแบรนด์: ${profile.tone_brand}`);
     if (profile.ci_color) lines.push(`สีประจำแบรนด์: ${profile.ci_color}`);
+    if (insights) {
+      lines.push(`\nแนวทางการสร้างคอนเทนต์เพื่อชนะคู่แข่ง (ให้ยึดแนวทางนี้เป็นหลัก):\n${insights}`);
+    }
     return lines.join('\n');
   }
 
@@ -60,10 +78,13 @@ export class ContentService {
   // generate + บันทึก DB (ใช้โดย scheduler ตี 6)
   async generateAndSave(input: { userId: string; lineUserId: string; topic?: string }) {
     const topic = input.topic ?? 'โปรโมทสินค้าและบริการ';
-    const profile = await this.getUserBrandProfile(input.userId);
+    const [profile, insights] = await Promise.all([
+      this.getUserBrandProfile(input.userId),
+      this.getLatestInsights(input.userId),
+    ]);
 
     const { caption } = await this.aiService.generateCaption(
-      this.buildCaptionPrompt(topic, profile),
+      this.buildCaptionPrompt(topic, profile, insights),
     );
 
     const { imageDataUrl } = await this.aiService.generateImage(
@@ -85,12 +106,15 @@ export class ContentService {
 
   // generate + ส่ง LINE ทันที (ใช้สำหรับ test)
   async generateAndSendToLine(input: { lineUserId: string; topic: string; userId?: string }) {
-    const profile = input.userId
-      ? await this.getUserBrandProfile(input.userId)
-      : { business_type: null, description: null, tone_brand: null, ci_color: null };
+    const [profile, insights] = await Promise.all([
+      input.userId
+        ? this.getUserBrandProfile(input.userId)
+        : Promise.resolve({ business_type: null, description: null, tone_brand: null, ci_color: null }),
+      input.userId ? this.getLatestInsights(input.userId) : Promise.resolve(null),
+    ]);
 
     const { caption } = await this.aiService.generateCaption(
-      this.buildCaptionPrompt(input.topic, profile),
+      this.buildCaptionPrompt(input.topic, profile, insights),
     );
 
     const { imageDataUrl } = await this.aiService.generateImage(
