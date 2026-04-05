@@ -4,6 +4,7 @@ import { verifyAccessToken } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import ScheduleForm from "./ScheduleForm";
+import CompetitorsSection from "./CompetitorsSection";
 
 async function logout() {
   "use server";
@@ -255,6 +256,8 @@ export default async function DashboardPage() {
           initialGenerateTime={user.generate_time ?? "06:00"}
           initialPostTime={user.post_time ?? "10:00"}
         />
+
+        <CompetitorsSection />
 
       </div>
     </main>
