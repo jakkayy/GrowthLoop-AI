@@ -83,6 +83,33 @@ export class AiService {
     }
   }
 
+  async analyzeOwnPagePerformance(summary: string): Promise<{ insights: string }> {
+    try {
+      const data = await this.postToOpenRouter({
+        model: this.config.get<string>('OPENROUTER_CAPTION_MODEL'),
+        messages: [
+          {
+            role: 'system',
+            content:
+              'คุณคือผู้เชี่ยวชาญ Facebook Content Analytics\n\nวิเคราะห์ performance โพสต์ 7 วันที่ผ่านมาของเพจ แล้วให้แนวทางเพื่อปรับปรุง content strategy\n\n[สิ่งที่ต้องวิเคราะห์]\n- โพสต์ไหนได้ engagement (likes/comments/shares) ดีที่สุดและทำไม\n- ธีม/รูปแบบ/โทนของ content ที่คนตอบสนองดี\n- ข้อสังเกตจาก comment ที่แสดงถึงความต้องการของ audience\n- ข้อเสนอแนะเป็น action item สำหรับ content ถัดไป\n\n[รูปแบบผลลัพธ์]\nตอบเป็น bullet points ภาษาไทย ไม่เกิน 8 ข้อ\nแต่ละข้อบอกชัดว่า "ทำอะไร" และ "เพราะอะไร" หรือ "จากข้อมูลอะไร"\nไม่ต้องมีคำนำหรือสรุปท้าย',
+          },
+          {
+            role: 'user',
+            content: `วิเคราะห์ performance ของเพจจากข้อมูล 7 วันล่าสุด:\n\n${summary}`,
+          },
+        ],
+      });
+
+      const insights = data?.choices?.[0]?.message?.content;
+      if (typeof insights !== 'string' || !insights.trim()) {
+        throw new InternalServerErrorException('Insights not returned');
+      }
+      return { insights: insights.trim() };
+    } catch (error) {
+      this.handleAiError(error, 'Analyze own page performance failed');
+    }
+  }
+
   async generateImage(prompt: string): Promise<{ imageDataUrl: string }> {
     try {
       const data = await this.postToOpenRouter(

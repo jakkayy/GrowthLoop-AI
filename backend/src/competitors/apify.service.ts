@@ -63,12 +63,17 @@ export class ApifyService {
 
   async runFacebookPostsScraper(pageUrl: string): Promise<string> {
     const actorId = 'apify~facebook-posts-scraper';
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0]; // "YYYY-MM-DD"
+
     const data = await this.postWithRetry(
       `${APIFY_BASE}/acts/${actorId}/runs`,
       {
         startUrls: [{ url: pageUrl }],
         resultsLimit: 5,
         commentsMode: 'NONE',
+        onlyPostsNewerThan: sevenDaysAgo,
       },
     );
     return data.data.id as string;
