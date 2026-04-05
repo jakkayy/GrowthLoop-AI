@@ -12,6 +12,8 @@ type UserBrandProfile = {
   description: string | null;
   tone_brand: string | null;
   ci_color: string | null;
+  caption_system_prompt: string | null;
+  image_prompt_prefix: string | null;
 };
 
 @Injectable()
@@ -34,10 +36,10 @@ export class ContentService {
   private async getUserBrandProfile(userId: string): Promise<UserBrandProfile> {
     const { data } = await this.supabase
       .from('users')
-      .select('business_type, description, tone_brand, ci_color')
+      .select('business_type, description, tone_brand, ci_color, caption_system_prompt, image_prompt_prefix')
       .eq('user_id', userId)
       .single();
-    return data ?? { business_type: null, description: null, tone_brand: null, ci_color: null };
+    return data ?? { business_type: null, description: null, tone_brand: null, ci_color: null, caption_system_prompt: null, image_prompt_prefix: null };
   }
 
   private async getLatestInsights(userId: string): Promise<string | null> {
@@ -68,7 +70,8 @@ export class ContentService {
   }
 
   private buildImagePrompt(caption: string, profile: UserBrandProfile): string {
-    const lines = [`Create a clean social media promotional image for: ${caption}`];
+    const prefix = profile.image_prompt_prefix?.trim() || 'Create a clean social media promotional image for';
+    const lines = [`${prefix}: ${caption}`];
     if (profile.business_type) lines.push(`Business type: ${profile.business_type}`);
     if (profile.tone_brand) lines.push(`Brand tone: ${profile.tone_brand}`);
     if (profile.ci_color) lines.push(`Brand colors: ${profile.ci_color}`);
@@ -85,6 +88,7 @@ export class ContentService {
 
     const { caption } = await this.aiService.generateCaption(
       this.buildCaptionPrompt(topic, profile, insights),
+      profile.caption_system_prompt,
     );
 
     const { imageDataUrl } = await this.aiService.generateImage(
@@ -109,12 +113,13 @@ export class ContentService {
     const [profile, insights] = await Promise.all([
       input.userId
         ? this.getUserBrandProfile(input.userId)
-        : Promise.resolve({ business_type: null, description: null, tone_brand: null, ci_color: null }),
+        : Promise.resolve({ business_type: null, description: null, tone_brand: null, ci_color: null, caption_system_prompt: null, image_prompt_prefix: null }),
       input.userId ? this.getLatestInsights(input.userId) : Promise.resolve(null),
     ]);
 
     const { caption } = await this.aiService.generateCaption(
       this.buildCaptionPrompt(input.topic, profile, insights),
+      profile.caption_system_prompt,
     );
 
     const { imageDataUrl } = await this.aiService.generateImage(

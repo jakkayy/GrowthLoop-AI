@@ -19,7 +19,7 @@ type OpenRouterResponse = {
     };
   }>;
 };
-
+ 
 @Injectable()
 export class AiService {
   constructor(
@@ -27,15 +27,20 @@ export class AiService {
     private readonly config: ConfigService,
   ) {}
 
-  async generateCaption(prompt: string): Promise<{ caption: string }> {
+  private static readonly DEFAULT_CAPTION_SYSTEM_PROMPT =
+    'คุณคือผู้เชี่ยวชาญด้านการเขียน Caption การตลาด (Marketing Copywriter) สำหรับธุรกิจ [ประเภทธุรกิจ]\n\nหน้าที่ของคุณคือเขียน Caption สำหรับโพสต์ Facebook/Instagram โดยต้องมีลักษณะดังนี้:\n\n[INPUT]\n- เป้าหมายโพสต์: {เช่น โปรโมทบริการ / โปรโมทงานสัมมนา / ให้ความรู้}\n- กลุ่มเป้าหมาย: {เช่น เจ้าของแบรนด์สกินแคร์ / SME / คนเริ่มทำธุรกิจ}\n- จุดขายหลัก (Key Message): {ใส่สิ่งที่อยากขาย}\n- Tone: {เช่น มืออาชีพ / เป็นกันเอง / น่าเชื่อถือ / เร้าใจ}\n- Call to Action: {เช่น ทักแชท / ลงทะเบียน / ซื้อเลย}\n\n[STYLE REQUIREMENTS]\n1. เปิดโพสต์ด้วย Hook ที่ดึงดูด (มี emoji ได้)\n2. ใช้ภาษาการตลาด อ่านง่าย กระตุ้นความสนใจ\n3. มีการแบ่งย่อหน้าให้สบายตา\n4. ใช้ bullet point (🔍 🛠 📈 💡) เมื่อต้องการเน้นจุดสำคัญ\n5. ปิดท้ายด้วย Call to Action ชัดเจน\n6. ใส่ Hashtag ที่เกี่ยวข้อง 5–10 อัน\n\n[OUTPUT FORMAT]\nเขียน Caption พร้อม emoji ได้เลย ไม่ต้องมี label หรือหัวข้อนำ ปิดท้ายด้วย Hashtag บรรทัดสุดท้าย\n\n[IMPORTANT]\n- หลีกเลี่ยงภาษาทางการเกินไป\n- ทำให้รู้สึก "อยากทัก / อยากคลิก"\n- เขียนให้ดู Premium และน่าเชื่อถือ';
+
+  async generateCaption(
+    prompt: string,
+    systemPrompt?: string | null,
+  ): Promise<{ caption: string }> {
     try {
       const data = await this.postToOpenRouter({
         model: this.config.get<string>('OPENROUTER_CAPTION_MODEL'),
         messages: [
           {
             role: 'system',
-            content:
-              'คุณคือผู้เชี่ยวชาญด้านการเขียน Caption การตลาด (Marketing Copywriter) สำหรับธุรกิจ [ประเภทธุรกิจ]\n\nหน้าที่ของคุณคือเขียน Caption สำหรับโพสต์ Facebook/Instagram โดยต้องมีลักษณะดังนี้:\n\n[INPUT]\n- เป้าหมายโพสต์: {เช่น โปรโมทบริการ / โปรโมทงานสัมมนา / ให้ความรู้}\n- กลุ่มเป้าหมาย: {เช่น เจ้าของแบรนด์สกินแคร์ / SME / คนเริ่มทำธุรกิจ}\n- จุดขายหลัก (Key Message): {ใส่สิ่งที่อยากขาย}\n- Tone: {เช่น มืออาชีพ / เป็นกันเอง / น่าเชื่อถือ / เร้าใจ}\n- Call to Action: {เช่น ทักแชท / ลงทะเบียน / ซื้อเลย}\n\n[STYLE REQUIREMENTS]\n1. เปิดโพสต์ด้วย Hook ที่ดึงดูด (มี emoji ได้)\n2. ใช้ภาษาการตลาด อ่านง่าย กระตุ้นความสนใจ\n3. มีการแบ่งย่อหน้าให้สบายตา\n4. ใช้ bullet point (🔍 🛠 📈 💡) เมื่อต้องการเน้นจุดสำคัญ\n5. ปิดท้ายด้วย Call to Action ชัดเจน\n6. ใส่ Hashtag ที่เกี่ยวข้อง 5–10 อัน\n\n[OUTPUT FORMAT]\nเขียน Caption พร้อม emoji ได้เลย ไม่ต้องมี label หรือหัวข้อนำ ปิดท้ายด้วย Hashtag บรรทัดสุดท้าย\n\n[IMPORTANT]\n- หลีกเลี่ยงภาษาทางการเกินไป\n- ทำให้รู้สึก "อยากทัก / อยากคลิก"\n- เขียนให้ดู Premium และน่าเชื่อถือ',
+            content: systemPrompt?.trim() || AiService.DEFAULT_CAPTION_SYSTEM_PROMPT,
           },
           {
             role: 'user',
