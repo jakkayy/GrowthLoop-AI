@@ -9,6 +9,7 @@ if (!JWT_SECRET) {
 export type TokenPayload = {
   userId: string;
   email: string;
+  role: "user" | "admin";
 };
 
 export function signAccessToken(payload: TokenPayload) {

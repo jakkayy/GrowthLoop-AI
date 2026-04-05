@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
     const { data: user, error } = await supabase
       .from("users")
-      .select("user_id, full_name, email, password_hash")
+      .select("user_id, full_name, email, password_hash, role")
       .eq("email", email)
       .maybeSingle();
 
@@ -63,9 +63,12 @@ export async function POST(req: Request) {
       );
     }
 
+    const role = (user.role ?? "user") as "user" | "admin";
+
     const accessToken = signAccessToken({
       userId: user.user_id,
       email: user.email,
+      role,
     });
 
     console.log("TOKEN_CREATED");
@@ -77,6 +80,7 @@ export async function POST(req: Request) {
           user_id: user.user_id,
           full_name: user.full_name,
           email: user.email,
+          role,
         },
       },
       { status: 200 }

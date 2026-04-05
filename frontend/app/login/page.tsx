@@ -30,7 +30,11 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
+    if (data.user?.role === "admin") {
+      router.push("/admin");
+    } else {
+      router.push("/dashboard");
+    }
   };
 
   return (
