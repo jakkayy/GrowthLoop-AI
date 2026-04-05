@@ -100,37 +100,37 @@ export default function CompetitorsSection() {
 
   const jobBadge = (job: ScrapeJob | null) => {
     if (!job)
-      return <span className="text-xs text-gray-600">ยังไม่เคย scrape</span>;
+      return <span className="text-xs text-gray-400">ยังไม่เคย scrape</span>;
     if (job.status === "running")
       return (
-        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-2 py-0.5 rounded-full">
-          <span className="h-1.5 w-1.5 rounded-full bg-yellow-400 animate-pulse" />
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-yellow-600 bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded-full">
+          <span className="h-1.5 w-1.5 rounded-full bg-yellow-500 animate-pulse" />
           กำลัง scrape...
         </span>
       );
     if (job.status === "failed")
       return (
-        <span className="text-xs font-medium text-red-400 bg-red-400/10 border border-red-400/20 px-2 py-0.5 rounded-full">
+        <span className="text-xs font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
           ล้มเหลว
         </span>
       );
     return (
-      <span className="text-xs font-medium text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-0.5 rounded-full">
+      <span className="text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
         สำเร็จ · {job.posts_count ?? 0} โพสต์
       </span>
     );
   };
 
   return (
-    <div className="rounded-2xl bg-[#161b22] border border-white/[0.08] p-6">
-      <h2 className="text-sm font-semibold text-white mb-0.5">วิเคราะห์คู่แข่ง (Facebook Competitor)</h2>
+    <div className="rounded-2xl bg-white border border-gray-200 p-6">
+      <h2 className="text-sm font-semibold text-gray-900 mb-0.5">วิเคราะห์คู่แข่ง (Facebook Competitor)</h2>
       <p className="text-xs text-gray-500 mb-5">
         เพิ่มลิงก์เพจ Facebook คู่แข่ง · ดึงโพสต์และคอมเม้นต์ 7 วันล่าสุด · AI วิเคราะห์อัตโนมัติทุกสัปดาห์
       </p>
 
       {/* Add form */}
-      <div className="mb-5 rounded-xl bg-white/[0.04] border border-white/[0.06] p-4 space-y-3">
-        <p className="text-xs font-medium text-gray-400">เพิ่มคู่แข่งใหม่</p>
+      <div className="mb-5 rounded-xl bg-gray-50 border border-gray-200 p-4 space-y-3">
+        <p className="text-xs font-medium text-gray-500">เพิ่มคู่แข่งใหม่</p>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
             <label className="text-xs text-gray-500">ชื่อเพจ</label>
@@ -139,7 +139,7 @@ export default function CompetitorsSection() {
               placeholder="เช่น ร้านกาแฟ ABC"
               value={pageName}
               onChange={(e) => setPageName(e.target.value)}
-              className="rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition"
+              className="rounded-xl bg-white border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -149,20 +149,20 @@ export default function CompetitorsSection() {
               placeholder="https://www.facebook.com/pagename"
               value={pageUrl}
               onChange={(e) => setPageUrl(e.target.value)}
-              className="rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition"
+              className="rounded-xl bg-white border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition"
             />
           </div>
         </div>
         <div className="flex items-center justify-between">
           {addError ? (
-            <p className="text-xs text-red-400">{addError}</p>
+            <p className="text-xs text-red-500">{addError}</p>
           ) : (
             <span />
           )}
           <button
             onClick={handleAdd}
             disabled={addLoading}
-            className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-50 transition-colors"
+            className="rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
           >
             {addLoading ? "กำลังเพิ่ม..." : "+ เพิ่มคู่แข่ง"}
           </button>
@@ -171,7 +171,7 @@ export default function CompetitorsSection() {
 
       {/* Competitor list */}
       {competitors.length === 0 ? (
-        <p className="text-center text-sm text-gray-600 py-6">ยังไม่มีคู่แข่ง</p>
+        <p className="text-center text-sm text-gray-400 py-6">ยังไม่มีคู่แข่ง</p>
       ) : (
         <div className="space-y-3">
           {competitors.map((c) => {
@@ -180,7 +180,7 @@ export default function CompetitorsSection() {
             return (
               <div
                 key={c.id}
-                className="rounded-xl bg-white/[0.04] border border-white/[0.06] p-4"
+                className="rounded-xl bg-gray-50 border border-gray-200 p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
@@ -188,12 +188,12 @@ export default function CompetitorsSection() {
                       f
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-white truncate">{c.page_name}</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">{c.page_name}</p>
                       <a
                         href={c.page_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-gray-500 hover:text-emerald-400 truncate block transition-colors"
+                        className="text-xs text-gray-500 hover:text-green-600 truncate block transition-colors"
                       >
                         {c.page_url}
                       </a>
@@ -206,7 +206,7 @@ export default function CompetitorsSection() {
                         href={job.result_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-emerald-400 hover:border-emerald-500/30 transition-colors"
+                        className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-green-600 hover:border-green-300 transition-colors"
                       >
                         ดูผล
                       </a>
@@ -214,21 +214,21 @@ export default function CompetitorsSection() {
                     <button
                       onClick={() => handleScrape(c)}
                       disabled={isScraping}
-                      className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 text-xs font-medium text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50 transition-colors"
+                      className="rounded-lg bg-green-50 border border-green-200 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-100 disabled:opacity-50 transition-colors"
                     >
                       {isScraping ? "กำลัง scrape..." : "Scrape Now"}
                     </button>
                     <button
                       onClick={() => handleDelete(c.id)}
                       disabled={isScraping}
-                      className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-red-400 hover:border-red-400/30 disabled:opacity-40 transition-colors"
+                      className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-red-500 hover:border-red-300 disabled:opacity-40 transition-colors"
                     >
                       ลบ
                     </button>
                   </div>
                 </div>
                 {job?.status === "completed" && job.completed_at && (
-                  <p className="mt-2 text-xs text-gray-600">
+                  <p className="mt-2 text-xs text-gray-400">
                     อัปเดตล่าสุด:{" "}
                     {new Date(job.completed_at).toLocaleDateString("th-TH", {
                       year: "numeric",
