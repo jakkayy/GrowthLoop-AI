@@ -28,11 +28,9 @@ export default function ScheduleForm({
   };
 
   return (
-    <div className="rounded-2xl border border-green-100 bg-white p-6 shadow-sm">
-      <h2 className="mb-1 text-sm font-semibold text-gray-500 uppercase tracking-wide">
-        ตั้งเวลาอัตโนมัติ
-      </h2>
-      <p className="mb-5 text-xs text-gray-400">กำหนดเวลาที่ระบบจะ generate และโพสต์คอนเทนต์ให้อัตโนมัติทุกวัน</p>
+    <div className="rounded-2xl bg-white border border-gray-100 p-6 shadow-sm">
+      <h2 className="text-sm font-semibold text-gray-900 mb-0.5">ตั้งเวลาอัตโนมัติ</h2>
+      <p className="text-xs text-gray-500 mb-5">กำหนดเวลาที่ระบบจะ generate และโพสต์คอนเทนต์ให้อัตโนมัติทุกวัน</p>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
@@ -41,7 +39,7 @@ export default function ScheduleForm({
             type="time"
             value={generateTime}
             onChange={(e) => setGenerateTime(e.target.value)}
-            className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+            className="rounded-xl bg-white border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition"
           />
           <p className="text-xs text-gray-400">AI จะสร้างคอนเทนต์เวลานี้</p>
         </div>
@@ -52,7 +50,7 @@ export default function ScheduleForm({
             type="time"
             value={postTime}
             onChange={(e) => setPostTime(e.target.value)}
-            className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+            className="rounded-xl bg-white border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition"
           />
           <p className="text-xs text-gray-400">โพสต์ไปยัง Facebook เวลานี้</p>
         </div>
@@ -69,7 +67,7 @@ export default function ScheduleForm({
         <button
           onClick={handleSave}
           disabled={loading}
-          className="rounded-xl bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-colors shadow-sm shadow-green-200"
+          className="rounded-xl bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
         >
           {loading ? "กำลังบันทึก..." : "บันทึก"}
         </button>

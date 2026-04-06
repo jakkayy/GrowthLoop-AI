@@ -4,6 +4,7 @@ import { ContentService } from '../content/content.service';
 import { LineService } from '../line/line.service';
 import { DraftsService } from '../drafts/drafts.service';
 import { FacebookPostService } from '../facebook/facebook-post.service';
+import { CompetitorsService } from '../competitors/competitors.service';
 
 function currentHHMM(): string {
   const now = new Date();
@@ -25,6 +26,7 @@ export class SchedulerService {
     private readonly lineService: LineService,
     private readonly draftsService: DraftsService,
     private readonly facebookPostService: FacebookPostService,
+    private readonly competitorsService: CompetitorsService,
   ) {}
 
   // ทุก 1 นาที — เช็ค user ที่ถึงเวลา generate แล้วส่ง LINE ให้อนุมัติ
@@ -94,5 +96,12 @@ export class SchedulerService {
   @Cron('*/5 * * * *')
   async expireOverdueDrafts() {
     await this.draftsService.expireOverdue();
+  }
+
+  // ทุกจันทร์ 08:00 (Asia/Bangkok) — scrape คู่แข่งอัตโนมัติรายสัปดาห์
+  @Cron('0 8 * * 1', { timeZone: 'Asia/Bangkok' })
+  async weeklyCompetitorScrape() {
+    this.logger.log('[Weekly] Starting competitor scrape');
+    await this.competitorsService.scrapeAllUsers();
   }
 }

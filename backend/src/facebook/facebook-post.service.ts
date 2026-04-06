@@ -3,6 +3,16 @@ import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import axios from 'axios';
 
+export type OwnPost = {
+  post_id: string;
+  message: string;
+  created_time: string;
+  likes_count: number;
+  comments_count: number;
+  shares_count: number;
+  comments: { text: string; author: string; created_time: string }[];
+};
+
 @Injectable()
 export class FacebookPostService {
   private readonly logger = new Logger(FacebookPostService.name);
@@ -16,6 +26,36 @@ export class FacebookPostService {
     );
     this.apiVersion =
       this.config.get<string>('FACEBOOK_API_VERSION') || 'v19.0';
+  }
+
+  async getPagePosts(pageId: string, accessToken: string): Promise<OwnPost[]> {
+    const since = Math.floor((Date.now() - 7 * 24 * 60 * 60 * 1000) / 1000);
+    const fields = [
+      'message',
+      'created_time',
+      'likes.summary(true)',
+      'comments.summary(true){message,from,created_time}',
+      'shares',
+    ].join(',');
+
+    const { data } = await axios.get(
+      `https://graph.facebook.com/${this.apiVersion}/${pageId}/posts`,
+      { params: { fields, access_token: accessToken, since, limit: 20 } },
+    );
+
+    return (data.data ?? []).map((p: any) => ({
+      post_id:        p.id,
+      message:        p.message ?? '',
+      created_time:   p.created_time,
+      likes_count:    p.likes?.summary?.total_count ?? 0,
+      comments_count: p.comments?.summary?.total_count ?? 0,
+      shares_count:   p.shares?.count ?? 0,
+      comments:       (p.comments?.data ?? []).map((c: any) => ({
+        text:         c.message ?? '',
+        author:       c.from?.name ?? '',
+        created_time: c.created_time,
+      })),
+    }));
   }
 
   async postToPages(input: {

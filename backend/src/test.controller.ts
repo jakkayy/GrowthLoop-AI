@@ -17,4 +17,15 @@ export class TestController {
       topic: topic || 'โปรโมทร้านกาแฟเปิดใหม่',
     });
   }
+
+  @Get('preview')
+  async preview(
+    @Query('userId') userId: string,
+    @Query('topic') topic: string,
+  ) {
+    return this.contentService.generatePreview({
+      userId,
+      topic: topic || 'โปรโมทสินค้าและบริการ',
+    });
+  }
 }

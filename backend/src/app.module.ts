@@ -7,6 +7,8 @@ import { ContentModule } from './content/content.module';
 import { StorageModule } from './storage/storage.module';
 import { DraftsModule } from './drafts/drafts.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { CompetitorsModule } from './competitors/competitors.module';
+import { FacebookPostModule } from './facebook/facebook-post.module';
 import { TestController } from './test.controller';
 
 @Module({
@@ -19,6 +21,8 @@ import { TestController } from './test.controller';
     StorageModule,
     DraftsModule,
     SchedulerModule,
+    CompetitorsModule,
+    FacebookPostModule,
   ],
   controllers: [TestController],
 })

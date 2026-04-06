@@ -29,7 +29,6 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="flex flex-1 flex-col items-center justify-center text-center px-6 py-28 relative overflow-hidden">
-        {/* Green glow blobs */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="h-[500px] w-[500px] rounded-full bg-green-200/60 blur-[130px]" />
         </div>
@@ -37,13 +36,11 @@ export default function LandingPage() {
         <div className="pointer-events-none absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-teal-200/40 blur-[100px]" />
 
         <div className="relative z-10 flex flex-col items-center gap-6 max-w-3xl">
-          {/* Badge */}
           <div className="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-1.5 text-xs font-medium text-green-700">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
             AI-Powered Marketing Platform
           </div>
 
-          {/* Headline */}
           <h1 className="text-5xl font-bold leading-tight tracking-tight sm:text-6xl text-gray-900">
             สร้างคอนเทนต์{" "}
             <span
@@ -66,7 +63,6 @@ export default function LandingPage() {
             ให้ธุรกิจของคุณเติบโตอย่างอัตโนมัติ
           </p>
 
-          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 mt-2">
             <Link
               href="/register"
@@ -82,7 +78,6 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          {/* Social proof */}
           <p className="text-xs text-gray-400 mt-1">ไม่ต้องใช้บัตรเครดิต · เริ่มใช้งานได้เลย</p>
         </div>
       </section>
@@ -145,15 +140,7 @@ export default function LandingPage() {
   );
 }
 
-function FeatureCard({
-  icon,
-  title,
-  desc,
-}: {
-  icon: string;
-  title: string;
-  desc: string;
-}) {
+function FeatureCard({ icon, title, desc }: { icon: string; title: string; desc: string }) {
   return (
     <div className="rounded-2xl border border-green-100 bg-white p-6 flex flex-col gap-3 hover:border-green-300 hover:shadow-md hover:shadow-green-100 transition-all">
       <div className="h-9 w-9 rounded-xl bg-green-100 flex items-center justify-center">

@@ -19,7 +19,7 @@ type OpenRouterResponse = {
     };
   }>;
 };
-
+ 
 @Injectable()
 export class AiService {
   constructor(
@@ -27,15 +27,20 @@ export class AiService {
     private readonly config: ConfigService,
   ) {}
 
-  async generateCaption(prompt: string): Promise<{ caption: string }> {
+  private static readonly DEFAULT_CAPTION_SYSTEM_PROMPT =
+    'คุณคือผู้เชี่ยวชาญด้านการเขียน Caption การตลาด (Marketing Copywriter) สำหรับธุรกิจ [ประเภทธุรกิจ]\n\nหน้าที่ของคุณคือเขียน Caption สำหรับโพสต์ Facebook/Instagram โดยต้องมีลักษณะดังนี้:\n\n[INPUT]\n- เป้าหมายโพสต์: {เช่น โปรโมทบริการ / โปรโมทงานสัมมนา / ให้ความรู้}\n- กลุ่มเป้าหมาย: {เช่น เจ้าของแบรนด์สกินแคร์ / SME / คนเริ่มทำธุรกิจ}\n- จุดขายหลัก (Key Message): {ใส่สิ่งที่อยากขาย}\n- Tone: {เช่น มืออาชีพ / เป็นกันเอง / น่าเชื่อถือ / เร้าใจ}\n- Call to Action: {เช่น ทักแชท / ลงทะเบียน / ซื้อเลย}\n\n[STYLE REQUIREMENTS]\n1. เปิดโพสต์ด้วย Hook ที่ดึงดูด (มี emoji ได้)\n2. ใช้ภาษาการตลาด อ่านง่าย กระตุ้นความสนใจ\n3. มีการแบ่งย่อหน้าให้สบายตา\n4. ใช้ bullet point (🔍 🛠 📈 💡) เมื่อต้องการเน้นจุดสำคัญ\n5. ปิดท้ายด้วย Call to Action ชัดเจน\n6. ใส่ Hashtag ที่เกี่ยวข้อง 5–10 อัน\n\n[OUTPUT FORMAT]\nเขียน Caption พร้อม emoji ได้เลย ไม่ต้องมี label หรือหัวข้อนำ ปิดท้ายด้วย Hashtag บรรทัดสุดท้าย\n\n[IMPORTANT]\n- หลีกเลี่ยงภาษาทางการเกินไป\n- ทำให้รู้สึก "อยากทัก / อยากคลิก"\n- เขียนให้ดู Premium และน่าเชื่อถือ';
+
+  async generateCaption(
+    prompt: string,
+    systemPrompt?: string | null,
+  ): Promise<{ caption: string }> {
     try {
       const data = await this.postToOpenRouter({
         model: this.config.get<string>('OPENROUTER_CAPTION_MODEL'),
         messages: [
           {
             role: 'system',
-            content:
-              'คุณคือผู้เชี่ยวชาญด้านการเขียน Caption การตลาด (Marketing Copywriter) สำหรับธุรกิจ [ประเภทธุรกิจ]\n\nหน้าที่ของคุณคือเขียน Caption สำหรับโพสต์ Facebook/Instagram โดยต้องมีลักษณะดังนี้:\n\n[INPUT]\n- เป้าหมายโพสต์: {เช่น โปรโมทบริการ / โปรโมทงานสัมมนา / ให้ความรู้}\n- กลุ่มเป้าหมาย: {เช่น เจ้าของแบรนด์สกินแคร์ / SME / คนเริ่มทำธุรกิจ}\n- จุดขายหลัก (Key Message): {ใส่สิ่งที่อยากขาย}\n- Tone: {เช่น มืออาชีพ / เป็นกันเอง / น่าเชื่อถือ / เร้าใจ}\n- Call to Action: {เช่น ทักแชท / ลงทะเบียน / ซื้อเลย}\n\n[STYLE REQUIREMENTS]\n1. เปิดโพสต์ด้วย Hook ที่ดึงดูด (มี emoji ได้)\n2. ใช้ภาษาการตลาด อ่านง่าย กระตุ้นความสนใจ\n3. มีการแบ่งย่อหน้าให้สบายตา\n4. ใช้ bullet point (🔍 🛠 📈 💡) เมื่อต้องการเน้นจุดสำคัญ\n5. ปิดท้ายด้วย Call to Action ชัดเจน\n6. ใส่ Hashtag ที่เกี่ยวข้อง 5–10 อัน\n\n[OUTPUT FORMAT]\nเขียน Caption พร้อม emoji ได้เลย ไม่ต้องมี label หรือหัวข้อนำ ปิดท้ายด้วย Hashtag บรรทัดสุดท้าย\n\n[IMPORTANT]\n- หลีกเลี่ยงภาษาทางการเกินไป\n- ทำให้รู้สึก "อยากทัก / อยากคลิก"\n- เขียนให้ดู Premium และน่าเชื่อถือ',
+            content: systemPrompt?.trim() || AiService.DEFAULT_CAPTION_SYSTEM_PROMPT,
           },
           {
             role: 'user',
@@ -56,8 +61,80 @@ export class AiService {
     }
   }
 
-  async generateImage(prompt: string): Promise<{ imageDataUrl: string }> {
+  async analyzeCompetitorInsights(summary: string): Promise<{ insights: string }> {
     try {
+      const data = await this.postToOpenRouter({
+        model: this.config.get<string>('OPENROUTER_CAPTION_MODEL'),
+        messages: [
+          {
+            role: 'system',
+            content:
+              'คุณคือนักวิเคราะห์การตลาดดิจิทัลผู้เชี่ยวชาญ Facebook Content Strategy\n\nหน้าที่ของคุณคือวิเคราะห์โพสต์และคอมเม้นต์จากเพจ Facebook ของคู่แข่ง แล้วให้แนวทางเชิงกลยุทธ์เพื่อช่วยให้แบรนด์ลูกค้าสร้างคอนเทนต์ที่ดีกว่าและชนะคู่แข่ง\n\n[สิ่งที่ต้องวิเคราะห์]\n- โพสต์ไหนได้ engagement (likes/comments/shares) สูงสุด และเพราะอะไร\n- รูปแบบ/ธีมของคอนเทนต์ที่คนตอบสนองดี\n- โทนและสไตล์การเขียนที่ใช้ได้ผล\n- ช่องว่างหรือจุดอ่อนของคู่แข่งที่สามารถใช้ประโยชน์ได้\n\n[รูปแบบผลลัพธ์]\nตอบเป็นแนวทางการสร้างคอนเทนต์ภาษาไทย เขียนให้กระชับ ชัดเจน และนำไปใช้ได้ทันที\nใช้รูปแบบ bullet points ไม่เกิน 8 ข้อ แต่ละข้อต้องบอกชัดว่า "ทำอะไร" และ "เพราะอะไร"\nไม่ต้องมีคำนำหรือสรุปท้าย ให้เริ่มที่แนวทางเลย',
+          },
+          {
+            role: 'user',
+            content: `วิเคราะห์ข้อมูลคู่แข่งต่อไปนี้และให้แนวทางการสร้างคอนเทนต์:\n\n${summary}`,
+          },
+        ],
+      });
+
+      const insights = data?.choices?.[0]?.message?.content;
+      if (typeof insights !== 'string' || !insights.trim()) {
+        throw new InternalServerErrorException('Insights not returned');
+      }
+      return { insights: insights.trim() };
+    } catch (error) {
+      this.handleAiError(error, 'Analyze competitor insights failed');
+    }
+  }
+
+  async analyzeOwnPagePerformance(summary: string): Promise<{ insights: string }> {
+    try {
+      const data = await this.postToOpenRouter({
+        model: this.config.get<string>('OPENROUTER_CAPTION_MODEL'),
+        messages: [
+          {
+            role: 'system',
+            content:
+              'คุณคือผู้เชี่ยวชาญ Facebook Content Analytics\n\nวิเคราะห์ performance โพสต์ 7 วันที่ผ่านมาของเพจ แล้วให้แนวทางเพื่อปรับปรุง content strategy\n\n[สิ่งที่ต้องวิเคราะห์]\n- โพสต์ไหนได้ engagement (likes/comments/shares) ดีที่สุดและทำไม\n- ธีม/รูปแบบ/โทนของ content ที่คนตอบสนองดี\n- ข้อสังเกตจาก comment ที่แสดงถึงความต้องการของ audience\n- ข้อเสนอแนะเป็น action item สำหรับ content ถัดไป\n\n[รูปแบบผลลัพธ์]\nตอบเป็น bullet points ภาษาไทย ไม่เกิน 8 ข้อ\nแต่ละข้อบอกชัดว่า "ทำอะไร" และ "เพราะอะไร" หรือ "จากข้อมูลอะไร"\nไม่ต้องมีคำนำหรือสรุปท้าย',
+          },
+          {
+            role: 'user',
+            content: `วิเคราะห์ performance ของเพจจากข้อมูล 7 วันล่าสุด:\n\n${summary}`,
+          },
+        ],
+      });
+
+      const insights = data?.choices?.[0]?.message?.content;
+      if (typeof insights !== 'string' || !insights.trim()) {
+        throw new InternalServerErrorException('Insights not returned');
+      }
+      return { insights: insights.trim() };
+    } catch (error) {
+      this.handleAiError(error, 'Analyze own page performance failed');
+    }
+  }
+
+  async generateImage(
+    prompt: string,
+    referenceImageUrls?: string[],
+  ): Promise<{ imageDataUrl: string }> {
+    try {
+      const hasRefs = referenceImageUrls && referenceImageUrls.length > 0;
+
+      const content: unknown = hasRefs
+        ? [
+            ...referenceImageUrls.map((url) => ({
+              type: 'image_url',
+              image_url: { url },
+            })),
+            {
+              type: 'text',
+              text: `The provided images are style references only. Study their visual style: color palette, mood, lighting, and design aesthetic. Then CREATE AN ENTIRELY NEW AND ORIGINAL image — do NOT reproduce, reuse, or closely imitate the subjects, objects, composition, or content of the reference images. Generate fresh visual content based on this brief: ${prompt}`,
+            },
+          ]
+        : prompt;
+
       const data = await this.postToOpenRouter(
         {
           model: this.config.get<string>('OPENROUTER_IMAGE_MODEL'),
@@ -65,7 +142,7 @@ export class AiService {
           messages: [
             {
               role: 'user',
-              content: prompt,
+              content,
             },
           ],
         },
