@@ -11,7 +11,7 @@ export default function UserSidebar({ activePage, logoutAction }: UserSidebarPro
     key: UserSidebarProps["activePage"];
     label: string;
     href: string;
-    icon: JSX.Element;
+    icon: React.ReactElement;
   }> = [
     {
       key: "overview",
