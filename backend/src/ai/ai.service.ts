@@ -115,8 +115,26 @@ export class AiService {
     }
   }
 
-  async generateImage(prompt: string): Promise<{ imageDataUrl: string }> {
+  async generateImage(
+    prompt: string,
+    referenceImageUrls?: string[],
+  ): Promise<{ imageDataUrl: string }> {
     try {
+      const hasRefs = referenceImageUrls && referenceImageUrls.length > 0;
+
+      const content: unknown = hasRefs
+        ? [
+            ...referenceImageUrls.map((url) => ({
+              type: 'image_url',
+              image_url: { url },
+            })),
+            {
+              type: 'text',
+              text: `The provided images are style references only. Study their visual style: color palette, mood, lighting, and design aesthetic. Then CREATE AN ENTIRELY NEW AND ORIGINAL image — do NOT reproduce, reuse, or closely imitate the subjects, objects, composition, or content of the reference images. Generate fresh visual content based on this brief: ${prompt}`,
+            },
+          ]
+        : prompt;
+
       const data = await this.postToOpenRouter(
         {
           model: this.config.get<string>('OPENROUTER_IMAGE_MODEL'),
@@ -124,7 +142,7 @@ export class AiService {
           messages: [
             {
               role: 'user',
-              content: prompt,
+              content,
             },
           ],
         },

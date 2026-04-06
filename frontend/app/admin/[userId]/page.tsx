@@ -2,6 +2,8 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PromptSettings from "./PromptSettings";
+import ReferenceImages from "./ReferenceImages";
+import TestGenerate from "./TestGenerate";
 
 type Draft = {
   id: string;
@@ -51,10 +53,12 @@ export default async function ClientDetailPage({
 
   const supabase = createAdminClient();
 
-  const [{ data: user }, { data: allDrafts }] = await Promise.all([
+  const [{ data: user }, { data: allDrafts }, { data: refImages }] = await Promise.all([
     supabase.from("users").select("user_id, full_name, brand_name, caption_system_prompt, image_prompt_prefix").eq("user_id", userId).single(),
     supabase.from("post_drafts").select("id, caption, image_url, status, sent_at, created_at")
       .eq("user_id", userId).order("created_at", { ascending: false }),
+    supabase.from("reference_images").select("id, image_url, created_at")
+      .eq("user_id", userId).order("created_at", { ascending: true }),
   ]);
 
   if (!user) notFound();
@@ -102,6 +106,19 @@ export default async function ClientDetailPage({
             <p className="text-sm text-gray-500 mt-0.5">{stat.label}</p>
           </div>
         ))}
+      </div>
+
+      {/* Test Generate */}
+      <div className="mb-6">
+        <TestGenerate userId={userId} />
+      </div>
+
+      {/* Reference Images */}
+      <div className="mb-6">
+        <ReferenceImages
+          userId={userId}
+          initialImages={refImages ?? []}
+        />
       </div>
 
       {/* Prompt Settings */}
