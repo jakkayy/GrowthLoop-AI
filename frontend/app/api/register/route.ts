@@ -83,6 +83,7 @@ export async function POST(req: Request) {
         const accessToken = signAccessToken({
         userId: newUser.user_id,
         email: newUser.email,
+        role: "user",
         });
 
         const response = NextResponse.json(
