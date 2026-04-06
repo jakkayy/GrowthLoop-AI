@@ -8,10 +8,13 @@ import { StorageService } from '../storage/storage.service';
 import { DraftsService } from '../drafts/drafts.service';
 
 type UserBrandProfile = {
+  brand_name: string | null;
   business_type: string | null;
   description: string | null;
+  target: string | null;
   tone_brand: string | null;
   ci_color: string | null;
+  market_goal: string | null;
 };
 
 @Injectable()
@@ -34,36 +37,86 @@ export class ContentService {
   private async getUserBrandProfile(userId: string): Promise<UserBrandProfile> {
     const { data } = await this.supabase
       .from('users')
-      .select('business_type, description, tone_brand, ci_color')
+      .select('brand_name, business_type, description, target, tone_brand, ci_color, market_goal')
       .eq('user_id', userId)
       .single();
-    return data ?? { business_type: null, description: null, tone_brand: null, ci_color: null };
+    return data ?? { brand_name: null, business_type: null, description: null, target: null, tone_brand: null, ci_color: null, market_goal: null };
   }
 
-  private buildCaptionPrompt(topic: string, profile: UserBrandProfile): string {
-    const lines = [`เขียนแคปชั่นภาษาไทยสำหรับโพสต์หัวข้อ: ${topic}`];
-    if (profile.business_type) lines.push(`ประเภทธุรกิจ: ${profile.business_type}`);
-    if (profile.description) lines.push(`รายละเอียดธุรกิจ: ${profile.description}`);
-    if (profile.tone_brand) lines.push(`โทนเสียงแบรนด์: ${profile.tone_brand}`);
-    if (profile.ci_color) lines.push(`สีประจำแบรนด์: ${profile.ci_color}`);
-    return lines.join('\n');
+  private async getLatestInsights(userId: string): Promise<string | null> {
+    const { data } = await this.supabase
+      .from('competitor_insights')
+      .select('content')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    return data?.content ?? null;
   }
+
+  private buildCaptionPrompt(
+    topic: string,
+    profile: UserBrandProfile,
+    insights: string | null,
+  ): string {
+    return `
+            คุณคือนักเขียนแคปชั่นโซเชียลมีเดียมืออาชีพของแบรนด์ "${profile.brand_name}"
+
+            [ข้อมูลแบรนด์]
+            - ประเภทธุรกิจ: ${profile.business_type}
+            - รายละเอียดธุรกิจ: ${profile.description}
+            - กลุ่มเป้าหมาย: ${profile.target}
+            - โทนเสียงของแบรนด์: ${profile.tone_brand}
+            - สีประจำแบรนด์: ${profile.ci_color}
+            - เป้าหมายการตลาด: ${profile.market_goal}
+
+            [หัวข้อโพสต์วันนี้]
+            ${topic}
+
+            [สิ่งที่ต้องทำ]
+            เขียนแคปชั่นภาษาไทย 1 โพสต์ สำหรับ Facebook/Instagram โดย:
+            1. เปิดด้วย Hook ที่ดึงดูดความสนใจในประโยคแรก (ใช้ emoji ได้)
+            2. เนื้อหากลางสื่อสารตรงถึงกลุ่มเป้าหมาย ใช้โทนเสียงของแบรนด์ให้ถูกต้อง
+            3. เน้นจุดขายหรือคุณค่าที่แบรนด์มอบให้ลูกค้า
+            4. ปิดด้วย Call to Action ที่ชัดเจนและกระตุ้นให้ทัก/คลิก/ซื้อ
+            5. ใส่ Hashtag ที่เกี่ยวข้อง 5-8 อัน ท้ายโพสต์
+
+            ${insights ? `[แนวทางจากการวิเคราะห์คู่แข่ง — ให้นำมาปรับใช้ด้วย]\n${insights}` : ''}
+                `.trim();
+              }
 
   private buildImagePrompt(caption: string, profile: UserBrandProfile): string {
-    const lines = [`Create a clean social media promotional image for: ${caption}`];
-    if (profile.business_type) lines.push(`Business type: ${profile.business_type}`);
-    if (profile.tone_brand) lines.push(`Brand tone: ${profile.tone_brand}`);
-    if (profile.ci_color) lines.push(`Brand colors: ${profile.ci_color}`);
-    return lines.join('. ');
-  }
+    return `
+            สร้างภาพโฆษณาโซเชียลมีเดียสำหรับแบรนด์ "${profile.brand_name}"
+
+            [ข้อมูลแบรนด์]
+            - ประเภทธุรกิจ: ${profile.business_type}
+            - สีประจำแบรนด์: ${profile.ci_color} (ให้ใช้สีนี้เป็นหลักในภาพ)
+            - บุคลิกและโทนของแบรนด์: ${profile.tone_brand}
+            - กลุ่มเป้าหมาย: ${profile.target}
+
+            [แคปชั่นที่ใช้คู่กับภาพนี้]
+            "${caption.substring(0, 300)}"
+
+            [ข้อกำหนดของภาพ]
+            - สไตล์: สะอาด ทันสมัย ดูเป็นมืออาชีพ เหมาะกับ Feed Facebook/Instagram
+            - องค์ประกอบ: ให้ภาพสื่อถึงสินค้าหรือบริการของแบรนด์อย่างชัดเจน
+            - สี: ใช้โทนสีของแบรนด์เป็นหลัก ไม่ฉูดฉาดเกินไป
+            - ข้อความในภาพ: ไม่ต้องใส่ข้อความ ยกเว้นชื่อแบรนด์เท่านั้น
+            - อารมณ์ของภาพ: ต้องสื่ออารมณ์เดียวกับแคปชั่นข้างต้น
+                `.trim();
+              }
 
   // generate + บันทึก DB (ใช้โดย scheduler ตี 6)
   async generateAndSave(input: { userId: string; lineUserId: string; topic?: string }) {
     const topic = input.topic ?? 'โปรโมทสินค้าและบริการ';
-    const profile = await this.getUserBrandProfile(input.userId);
+    const [profile, insights] = await Promise.all([
+      this.getUserBrandProfile(input.userId),
+      this.getLatestInsights(input.userId),
+    ]);
 
     const { caption } = await this.aiService.generateCaption(
-      this.buildCaptionPrompt(topic, profile),
+      this.buildCaptionPrompt(topic, profile, insights),
     );
 
     const { imageDataUrl } = await this.aiService.generateImage(
@@ -85,12 +138,15 @@ export class ContentService {
 
   // generate + ส่ง LINE ทันที (ใช้สำหรับ test)
   async generateAndSendToLine(input: { lineUserId: string; topic: string; userId?: string }) {
-    const profile = input.userId
-      ? await this.getUserBrandProfile(input.userId)
-      : { business_type: null, description: null, tone_brand: null, ci_color: null };
+    const [profile, insights] = await Promise.all([
+      input.userId
+        ? this.getUserBrandProfile(input.userId)
+        : Promise.resolve({ brand_name: null, business_type: null, description: null, target: null, tone_brand: null, ci_color: null, market_goal: null }),
+      input.userId ? this.getLatestInsights(input.userId) : Promise.resolve(null),
+    ]);
 
     const { caption } = await this.aiService.generateCaption(
-      this.buildCaptionPrompt(input.topic, profile),
+      this.buildCaptionPrompt(input.topic, profile, insights),
     );
 
     const { imageDataUrl } = await this.aiService.generateImage(
