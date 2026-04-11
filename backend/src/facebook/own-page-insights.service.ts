@@ -64,9 +64,10 @@ export class OwnPageInsightsService {
           .join('\n\n');
 
         summaryParts.push(`=== ${page.page_name} ===\n${postsText}`);
-      } catch (err) {
+      } catch (err: any) {
+        const detail = err?.response?.data?.error?.message ?? String(err);
         this.logger.warn(
-          `Failed to fetch posts for page ${page.page_name}: ${String(err)}`,
+          `Failed to fetch posts for page ${page.page_name}: ${detail}`,
         );
       }
     }
