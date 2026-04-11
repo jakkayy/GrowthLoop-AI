@@ -70,7 +70,7 @@ const targets = users.filter((u) => u.generate_time === now);
   async postBySchedule() {
     const now = currentHHMM();
     const drafts = await this.draftsService.getApprovedWithSchedule();
-    const targets = drafts.filter((d) => d.post_time === now);
+    const targets = drafts.filter((d) => d.post_time <= now);
     if (targets.length === 0) return;
 
     this.logger.log(

@@ -19,6 +19,11 @@ type Competitor = {
   competitor_scrape_jobs: ScrapeJob[];
 };
 
+type InsightData = {
+  content: string | null;
+  created_at: string | null;
+};
+
 export default function CompetitorsSection() {
   const [competitors, setCompetitors] = useState<Competitor[]>([]);
   const [pageUrl, setPageUrl] = useState("");
@@ -26,6 +31,10 @@ export default function CompetitorsSection() {
   const [addLoading, setAddLoading] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [scrapingIds, setScrapingIds] = useState<Set<string>>(new Set());
+  const [insights, setInsights] = useState<InsightData>({ content: null, created_at: null });
+  const [insightsLoading, setInsightsLoading] = useState(true);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analyzeError, setAnalyzeError] = useState<string | null>(null);
 
   const fetchCompetitors = useCallback(async () => {
     const res = await fetch("/api/competitors");
@@ -35,9 +44,32 @@ export default function CompetitorsSection() {
     }
   }, []);
 
+  const fetchInsights = useCallback(async () => {
+    const res = await fetch("/api/competitors/analyze");
+    if (res.ok) {
+      const data = await res.json();
+      setInsights(data);
+    }
+    setInsightsLoading(false);
+  }, []);
+
   useEffect(() => {
     fetchCompetitors();
-  }, [fetchCompetitors]);
+    fetchInsights();
+  }, [fetchCompetitors, fetchInsights]);
+
+  const handleAnalyze = async () => {
+    setAnalyzing(true);
+    setAnalyzeError(null);
+    const res = await fetch("/api/competitors/analyze", { method: "POST" });
+    const json = await res.json();
+    setAnalyzing(false);
+    if (!res.ok) {
+      setAnalyzeError(json.message ?? "เกิดข้อผิดพลาด");
+      return;
+    }
+    fetchInsights();
+  };
 
   useEffect(() => {
     const hasRunning = competitors.some((c) =>
@@ -121,12 +153,85 @@ export default function CompetitorsSection() {
     );
   };
 
+  const insightLines = insights.content
+    ? insights.content.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => l.replace(/^[-•*\d.]+\s*/, ""))
+    : [];
+
+  const formattedDate = insights.created_at
+    ? new Date(insights.created_at).toLocaleDateString("th-TH", {
+        year: "numeric", month: "short", day: "numeric",
+        hour: "2-digit", minute: "2-digit",
+      })
+    : null;
+
   return (
     <div className="rounded-2xl bg-white border border-gray-200 p-6">
-      <h2 className="text-sm font-semibold text-gray-900 mb-0.5">วิเคราะห์คู่แข่ง (Facebook Competitor)</h2>
-      <p className="text-xs text-gray-500 mb-5">
-        เพิ่มลิงก์เพจ Facebook คู่แข่ง · ดึงโพสต์และคอมเม้นต์ 7 วันล่าสุด · AI วิเคราะห์อัตโนมัติทุกสัปดาห์
-      </p>
+      <div className="flex items-start justify-between mb-1">
+        <div>
+          <span className="text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-full tracking-wide">
+            COMPETITOR ANALYSIS
+          </span>
+          <h2 className="text-sm font-semibold text-gray-900 mt-2">วิเคราะห์คู่แข่ง (Facebook Competitor)</h2>
+          <p className="text-xs text-gray-500 mt-0.5">
+            เพิ่มลิงก์เพจ Facebook คู่แข่ง · ดึงโพสต์และคอมเม้นต์ 7 วันล่าสุด · AI วิเคราะห์อัตโนมัติทุกสัปดาห์
+          </p>
+        </div>
+        <button
+          onClick={handleAnalyze}
+          disabled={analyzing}
+          className="shrink-0 rounded-xl bg-purple-600 px-4 py-2 text-xs font-medium text-white hover:bg-purple-700 disabled:opacity-50 transition-colors"
+        >
+          {analyzing ? "กำลังวิเคราะห์..." : "วิเคราะห์ตอนนี้"}
+        </button>
+      </div>
+
+      {/* Insights result */}
+      <div className="mb-5 mt-4">
+        {analyzeError && (
+          <div className="mb-3 rounded-xl bg-red-50 border border-red-200 px-4 py-3">
+            <p className="text-xs text-red-600">{analyzeError}</p>
+          </div>
+        )}
+        {insightsLoading ? (
+          <div className="flex items-center justify-center py-6">
+            <div className="h-5 w-5 rounded-full border-2 border-purple-600 border-t-transparent animate-spin" />
+          </div>
+        ) : insightLines.length > 0 ? (
+          <>
+            <div className="space-y-2">
+              {insightLines.map((line, i) => {
+                const colonIdx = line.indexOf(":");
+                const hasColon = colonIdx > 0 && colonIdx < 40;
+                const title = hasColon ? line.substring(0, colonIdx).trim() : line;
+                const desc = hasColon ? line.substring(colonIdx + 1).trim() : "";
+                return (
+                  <div key={i} className="flex gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                    <span className="text-xs font-bold text-purple-600 shrink-0 mt-0.5 w-5">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 leading-snug">{title}</p>
+                      {desc && <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{desc}</p>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {formattedDate && (
+              <p className="mt-3 text-xs text-gray-400">วิเคราะห์ล่าสุด: {formattedDate}</p>
+            )}
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-6 text-center rounded-xl bg-gray-50 border border-gray-100">
+            <span className="text-2xl mb-2">🔍</span>
+            <p className="text-sm font-medium text-gray-500">ยังไม่มีข้อมูลวิเคราะห์</p>
+            <p className="text-xs text-gray-400 mt-1">Scrape คู่แข่งก่อน แล้วกด "วิเคราะห์ตอนนี้"</p>
+          </div>
+        )}
+      </div>
+
+      <div className="border-t border-gray-100 pt-5">
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">รายการคู่แข่ง</p>
 
       {/* Add form */}
       <div className="mb-5 rounded-xl bg-gray-50 border border-gray-200 p-4 space-y-3">
@@ -175,6 +280,7 @@ export default function CompetitorsSection() {
       ) : (
         <div className="space-y-3">
           {competitors.map((c) => {
+
             const job = latestJob(c);
             const isScraping = scrapingIds.has(c.id) || job?.status === "running";
             return (
@@ -244,6 +350,7 @@ export default function CompetitorsSection() {
           })}
         </div>
       )}
+      </div>
     </div>
   );
 }

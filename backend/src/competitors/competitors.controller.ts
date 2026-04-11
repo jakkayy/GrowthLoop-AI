@@ -36,6 +36,13 @@ export class CompetitorsController {
     await this.competitors.deleteCompetitor(id, userId);
   }
 
+  @Post('analyze')
+  @HttpCode(200)
+  async analyze(@Query('userId') userId: string) {
+    await this.competitors.analyzeForUser(userId);
+    return { ok: true };
+  }
+
   @Post(':id/scrape')
   async scrape(
     @Param('id') competitorId: string,

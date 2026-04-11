@@ -283,15 +283,16 @@ export class CompetitorsService {
     );
 
     // 9. Analyze all competitors for this user and save insights
-    this.analyzeAndSaveInsights(userId, competitorId).catch((err) => {
+    this.analyzeAndSaveInsights(userId).catch((err) => {
       this.logger.error(`analyzeAndSaveInsights failed: ${String(err)}`);
     });
   }
 
-  private async analyzeAndSaveInsights(
-    userId: string,
-    triggeredByCompetitorId: string,
-  ): Promise<void> {
+  async analyzeForUser(userId: string): Promise<void> {
+    await this.analyzeAndSaveInsights(userId);
+  }
+
+  private async analyzeAndSaveInsights(userId: string): Promise<void> {
     // ดึง result_url ล่าสุดของทุกคู่แข่งใน user นี้
     const { data: jobs } = await this.supabase
       .from('competitor_scrape_jobs')

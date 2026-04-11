@@ -62,6 +62,7 @@ export async function POST(req: Request) {
             full_name: name,
             email,
             password_hash: passwordHash,
+            role: "user",
             brand_name: brand_name,
             business_type: business_type,
             description: description,

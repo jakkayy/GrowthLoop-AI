@@ -116,7 +116,7 @@ export class DraftsService {
   async claimForPosting(draftId: string): Promise<boolean> {
     const { count, error } = await this.supabase
       .from('post_drafts')
-      .update({ status: 'posted' })
+      .update({ status: 'posted' }, { count: 'exact' })
       .eq('id', draftId)
       .eq('status', 'approved');
 
