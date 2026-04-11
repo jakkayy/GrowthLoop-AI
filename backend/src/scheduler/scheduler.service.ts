@@ -80,12 +80,14 @@ export class SchedulerService {
 
     for (const draft of targets) {
       try {
+        const claimed = await this.draftsService.claimForPosting(draft.id);
+        if (!claimed) continue; // อีก instance claim ไปก่อนแล้ว
+
         await this.facebookPostService.postToPages({
           userId: draft.user_id,
           caption: draft.caption,
           imageUrl: draft.image_url,
         });
-        await this.draftsService.markPosted(draft.id);
         this.logger.log(`Draft ${draft.id} posted successfully`);
       } catch (err) {
         this.logger.error(`Failed to post draft ${draft.id}: ${String(err)}`);

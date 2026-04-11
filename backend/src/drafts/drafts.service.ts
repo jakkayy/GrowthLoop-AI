@@ -113,13 +113,15 @@ export class DraftsService {
     return data ?? [];
   }
 
-  async markPosted(draftId: string) {
-    const { error } = await this.supabase
+  async claimForPosting(draftId: string): Promise<boolean> {
+    const { count, error } = await this.supabase
       .from('post_drafts')
       .update({ status: 'posted' })
-      .eq('id', draftId);
+      .eq('id', draftId)
+      .eq('status', 'approved');
 
     if (error) throw new Error(error.message);
+    return (count ?? 0) > 0;
   }
 
   async getAllActiveUsers(): Promise<
