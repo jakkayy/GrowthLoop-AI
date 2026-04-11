@@ -60,7 +60,15 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const userAccessToken: string = tokenData.access_token;
+  const shortLivedToken: string = tokenData.access_token;
+
+  // 1.5) แลก short-lived token → long-lived token (~60 วัน)
+  //       page token ที่ได้จาก long-lived token จะ never expire
+  const longTokenRes = await fetch(
+    `https://graph.facebook.com/v19.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${shortLivedToken}`
+  );
+  const longTokenData = await longTokenRes.json();
+  const userAccessToken: string = longTokenData.access_token ?? shortLivedToken;
 
   // 2) ดึงข้อมูล user Facebook
   const meRes = await fetch(
