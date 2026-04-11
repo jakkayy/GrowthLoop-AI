@@ -7,6 +7,7 @@ import UserSidebar from "@/components/UserSidebar";
 import ScheduleForm from "./ScheduleForm";
 import CompetitorsSection from "./CompetitorsSection";
 import OwnPageInsightsSection from "./OwnPageInsightsSection";
+import ReferenceImages from "./ReferenceImages";
 
 async function logout() {
   "use server";
@@ -115,12 +116,22 @@ async function getFacebookConnection(userId: string): Promise<FacebookConnection
   return { ...conn, pages: pages ?? [] };
 }
 
+async function getReferenceImages(userId: string) {
+  const { data } = await supabase
+    .from("reference_images")
+    .select("id, image_url, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true });
+  return data ?? [];
+}
+
 export default async function DashboardPage() {
   const user = await getUser();
-  const [lineConn, fbConn, insights] = await Promise.all([
+  const [lineConn, fbConn, insights, referenceImages] = await Promise.all([
     getLineConnection(user.user_id),
     getFacebookConnection(user.user_id),
     getLatestInsights(user.user_id),
+    getReferenceImages(user.user_id),
   ]);
 
   const joinedDate = new Date(user.created_at).toLocaleDateString("th-TH", {
@@ -321,6 +332,9 @@ export default async function DashboardPage() {
                   </div>
                 )}
               </div>
+
+              {/* Reference Images */}
+              <ReferenceImages initialImages={referenceImages} />
 
               {/* Account info (compact) */}
               <div className="rounded-2xl bg-white border border-gray-200 p-5">
