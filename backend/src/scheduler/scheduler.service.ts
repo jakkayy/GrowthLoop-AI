@@ -34,8 +34,7 @@ export class SchedulerService {
   async generateAndSendBySchedule() {
     const now = currentHHMM();
     const users = await this.draftsService.getAllActiveUsers();
-    this.logger.debug(`[Scheduler] now=${now} users=${users.length} times=${users.map((u) => u.generate_time).join(',')}`);
-    const targets = users.filter((u) => u.generate_time === now);
+const targets = users.filter((u) => u.generate_time === now);
     if (targets.length === 0) return;
 
     this.logger.log(
