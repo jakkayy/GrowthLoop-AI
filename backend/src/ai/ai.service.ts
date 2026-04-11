@@ -130,7 +130,7 @@ export class AiService {
             })),
             {
               type: 'text',
-              text: `The provided images are style references only. Study their visual style: color palette, mood, lighting, and design aesthetic. Then CREATE AN ENTIRELY NEW AND ORIGINAL image — do NOT reproduce, reuse, or closely imitate the subjects, objects, composition, or content of the reference images. Generate fresh visual content based on this brief: ${prompt}`,
+              text: `The provided image shows the product to feature. You MUST include this exact product in the generated image — preserve its shape, color, packaging, and key visual details faithfully. Create a fresh, professional social media promotional image with a new composition, background, and styling that suits the brand brief below, but keep the product appearance true to the reference. Do NOT include any text, letters, words, or typography anywhere in the image.\n\nBrief: ${prompt}`,
             },
           ]
         : prompt;

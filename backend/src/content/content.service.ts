@@ -45,13 +45,16 @@ export class ContentService {
     return data ?? { brand_name: null, business_type: null, description: null, target: null, tone_brand: null, ci_color: null, market_goal: null, caption_system_prompt: null, image_prompt_prefix: null };
   }
 
-  private async getReferenceImageUrls(userId: string): Promise<string[]> {
+  private async getRandomReferenceImageUrl(userId: string): Promise<string | null> {
     const { data } = await this.supabase
       .from('reference_images')
       .select('image_url')
       .eq('user_id', userId)
-      .order('created_at', { ascending: true });
-    return (data ?? []).map((r) => r.image_url);
+      .order('created_at', { ascending: true })
+      .limit(5);
+    const urls = (data ?? []).map((r) => r.image_url);
+    if (urls.length === 0) return null;
+    return urls[Math.floor(Math.random() * urls.length)];
   }
 
   private async getLatestInsights(userId: string): Promise<string | null> {
@@ -98,7 +101,7 @@ ${insights ? `[แนวทางจากการวิเคราะห์�
 
   private buildImagePrompt(caption: string, profile: UserBrandProfile): string {
     if (profile.image_prompt_prefix?.trim()) {
-      return `${profile.image_prompt_prefix.trim()}: ${caption}`;
+      return `${profile.image_prompt_prefix.trim()}: ${caption}. No text, letters, words, or typography of any kind in the image.`;
     }
     return `
 สร้างภาพโฆษณาโซเชียลมีเดียสำหรับแบรนด์ "${profile.brand_name}"
@@ -116,7 +119,7 @@ ${insights ? `[แนวทางจากการวิเคราะห์�
 - สไตล์: สะอาด ทันสมัย ดูเป็นมืออาชีพ เหมาะกับ Feed Facebook/Instagram
 - องค์ประกอบ: ให้ภาพสื่อถึงสินค้าหรือบริการของแบรนด์อย่างชัดเจน
 - สี: ใช้โทนสีของแบรนด์เป็นหลัก ไม่ฉูดฉาดเกินไป
-- ข้อความในภาพ: ไม่ต้องใส่ข้อความ ยกเว้นชื่อแบรนด์เท่านั้น
+- ข้อความในภาพ: ห้ามมีตัวอักษร คำ หรือข้อความใดๆ ในภาพทั้งสิ้น
 - อารมณ์ของภาพ: ต้องสื่ออารมณ์เดียวกับแคปชั่นข้างต้น
     `.trim();
   }
@@ -124,10 +127,10 @@ ${insights ? `[แนวทางจากการวิเคราะห์�
   // generate เพื่อ preview เท่านั้น — ไม่บันทึก DB (ใช้โดย test endpoint)
   async generatePreview(input: { userId: string; topic?: string }) {
     const topic = input.topic ?? 'โปรโมทสินค้าและบริการ';
-    const [profile, insights, referenceImageUrls] = await Promise.all([
+    const [profile, insights, referenceImageUrl] = await Promise.all([
       this.getUserBrandProfile(input.userId),
       this.getLatestInsights(input.userId),
-      this.getReferenceImageUrls(input.userId),
+      this.getRandomReferenceImageUrl(input.userId),
     ]);
 
     const { caption } = await this.aiService.generateCaption(
@@ -137,7 +140,7 @@ ${insights ? `[แนวทางจากการวิเคราะห์�
 
     const { imageDataUrl } = await this.aiService.generateImage(
       this.buildImagePrompt(caption, profile),
-      referenceImageUrls,
+      referenceImageUrl ? [referenceImageUrl] : undefined,
     );
 
     const imageUrl = await this.storageService.saveDataUrlAsPublicImage(imageDataUrl);
@@ -148,10 +151,10 @@ ${insights ? `[แนวทางจากการวิเคราะห์�
   // generate + บันทึก DB (ใช้โดย scheduler ตี 6)
   async generateAndSave(input: { userId: string; lineUserId: string; topic?: string }) {
     const topic = input.topic ?? 'โปรโมทสินค้าและบริการ';
-    const [profile, insights, referenceImageUrls] = await Promise.all([
+    const [profile, insights, referenceImageUrl] = await Promise.all([
       this.getUserBrandProfile(input.userId),
       this.getLatestInsights(input.userId),
-      this.getReferenceImageUrls(input.userId),
+      this.getRandomReferenceImageUrl(input.userId),
     ]);
 
     const { caption } = await this.aiService.generateCaption(
@@ -161,7 +164,7 @@ ${insights ? `[แนวทางจากการวิเคราะห์�
 
     const { imageDataUrl } = await this.aiService.generateImage(
       this.buildImagePrompt(caption, profile),
-      referenceImageUrls,
+      referenceImageUrl ? [referenceImageUrl] : undefined,
     );
 
     const imageUrl =
@@ -179,12 +182,12 @@ ${insights ? `[แนวทางจากการวิเคราะห์�
 
   // generate + ส่ง LINE ทันที (ใช้สำหรับ test)
   async generateAndSendToLine(input: { lineUserId: string; topic: string; userId?: string }) {
-    const [profile, insights, referenceImageUrls] = await Promise.all([
+    const [profile, insights, referenceImageUrl] = await Promise.all([
       input.userId
         ? this.getUserBrandProfile(input.userId)
         : Promise.resolve({ brand_name: null, business_type: null, description: null, target: null, tone_brand: null, ci_color: null, market_goal: null, caption_system_prompt: null, image_prompt_prefix: null }),
       input.userId ? this.getLatestInsights(input.userId) : Promise.resolve(null),
-      input.userId ? this.getReferenceImageUrls(input.userId) : Promise.resolve([]),
+      input.userId ? this.getRandomReferenceImageUrl(input.userId) : Promise.resolve(null),
     ]);
 
     const { caption } = await this.aiService.generateCaption(
@@ -194,7 +197,7 @@ ${insights ? `[แนวทางจากการวิเคราะห์�
 
     const { imageDataUrl } = await this.aiService.generateImage(
       this.buildImagePrompt(caption, profile),
-      referenceImageUrls,
+      referenceImageUrl ? [referenceImageUrl] : undefined,
     );
 
     const imageUrl =
