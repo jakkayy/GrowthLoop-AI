@@ -16,7 +16,8 @@ export async function GET() {
     `?client_id=${appId}` +
     `&redirect_uri=${encodeURIComponent(redirectUri)}` +
     `&state=${state}` +
-    `&scope=${encodeURIComponent(scope)}`;
+    `&scope=${encodeURIComponent(scope)}` +
+    `&auth_type=rerequest`;
 
   return NextResponse.redirect(url);
 }
