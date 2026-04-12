@@ -130,7 +130,7 @@ export class AiService {
             })),
             {
               type: 'text',
-              text: `The provided image shows the product to feature. You MUST include this exact product in the generated image — preserve its shape, color, packaging, and key visual details faithfully. Create a fresh, professional social media promotional image with a new composition, background, and styling that suits the brand brief below, but keep the product appearance true to the reference. Do NOT include any text, letters, words, or typography anywhere in the image.\n\nBrief: ${prompt}`,
+              text: `The provided image shows the product to feature. You MUST reproduce this exact product faithfully — the product's shape, color, and packaging must remain absolutely identical to the reference, with no alterations whatsoever. Do NOT modify, redesign, or reinterpret the packaging in any way. However, everything else in the image (background, environment, props, lighting, composition, styling) should be freshly created to best suit the brand brief below. Feel free to be creative with the scene, setting, and atmosphere — just keep the product itself exactly as shown. Do NOT include any text, letters, words, or typography anywhere in the image.\n\nBrief: ${prompt}`,
             },
           ]
         : prompt;

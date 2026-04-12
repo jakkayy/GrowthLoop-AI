@@ -108,12 +108,14 @@ ${insights ? `[แนวทางจากการวิเคราะห์�
 
 [ข้อมูลแบรนด์]
 - ประเภทธุรกิจ: ${profile.business_type}
+- รายละเอียดธุรกิจ: ${profile.description}
 - สีประจำแบรนด์: ${profile.ci_color} (ให้ใช้สีนี้เป็นหลักในภาพ)
 - บุคลิกและโทนของแบรนด์: ${profile.tone_brand}
 - กลุ่มเป้าหมาย: ${profile.target}
+- เป้าหมายการตลาด: ${profile.market_goal}
 
 [แคปชั่นที่ใช้คู่กับภาพนี้]
-"${caption.substring(0, 300)}"
+"${caption}"
 
 [ข้อกำหนดของภาพ]
 - สไตล์: สะอาด ทันสมัย ดูเป็นมืออาชีพ เหมาะกับ Feed Facebook/Instagram
