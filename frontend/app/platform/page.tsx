@@ -55,7 +55,7 @@ const STATUS_CONFIG: Record<PostDraft["status"], { label: string; className: str
 function StatusBadge({ status }: { status: PostDraft["status"] }) {
   const cfg = STATUS_CONFIG[status];
   return (
-    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${cfg.className}`}>
+    <span className={`text-sm font-medium px-2.5 py-1 rounded-full ${cfg.className}`}>
       {cfg.label}
     </span>
   );
@@ -71,7 +71,7 @@ function PostCard({ draft }: { draft: PostDraft }) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 flex flex-col gap-2 hover:border-green-300 transition-colors">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs text-gray-600 leading-relaxed line-clamp-3 flex-1">
+        <p className="text-sm text-gray-600 leading-relaxed line-clamp-3 flex-1">
           {draft.caption || "ไม่มีเนื้อหา"}
         </p>
         {draft.image_url && (
@@ -85,7 +85,7 @@ function PostCard({ draft }: { draft: PostDraft }) {
       </div>
       <div className="flex items-center justify-between pt-1 border-t border-gray-100">
         <StatusBadge status={draft.status} />
-        <span className="text-xs text-gray-400">{formatDate(draft.sent_at ?? draft.created_at)}</span>
+        <span className="text-[15px] text-gray-400">{formatDate(draft.sent_at ?? draft.created_at)}</span>
       </div>
     </div>
   );
@@ -95,7 +95,7 @@ function EmptyState({ text }: { text: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div className="h-12 w-12 rounded-2xl bg-gray-100 flex items-center justify-center mb-3 text-xl">📭</div>
-      <p className="text-sm text-gray-500">{text}</p>
+      <p className="text-[15px] text-gray-500">{text}</p>
     </div>
   );
 }
@@ -127,7 +127,7 @@ export default async function PlatformPage() {
           {/* Connect Buttons */}
           <div className="rounded-2xl border border-gray-200 bg-white p-6">
             <h2 className="text-lg font-bold text-gray-900 mb-1">เชื่อมต่อแพลตฟอร์ม</h2>
-            <p className="text-sm text-gray-500 mb-5">เลือกแพลตฟอร์มที่ต้องการเชื่อมต่อกับระบบ</p>
+            <p className="text-[15px] text-gray-500 mb-5">เลือกแพลตฟอร์มที่ต้องการเชื่อมต่อกับระบบ</p>
             <div className="flex gap-3">
               <a
                 href="/api/line/login"
@@ -152,10 +152,10 @@ export default async function PlatformPage() {
               <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
                 <div className="h-8 w-8 rounded-xl bg-[#06C755]/20 flex items-center justify-center text-[#06C755] text-sm font-bold border border-[#06C755]/20">L</div>
                 <div>
-                  <h2 className="text-sm font-semibold text-gray-900">LINE</h2>
-                  <p className="text-xs text-gray-500">ประวัติการส่งและอนุมัติ</p>
+                  <h2 className="text-base font-semibold text-gray-900">LINE</h2>
+                  <p className="text-[15px] text-gray-500">ประวัติการส่งและอนุมัติ</p>
                 </div>
-                <span className="ml-auto text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200 px-2.5 py-1 rounded-full">
+                <span className="ml-auto text-sm font-medium bg-gray-50 text-gray-600 border border-gray-200 px-2.5 py-1 rounded-full">
                   {lineDrafts.length} รายการ
                 </span>
               </div>
@@ -173,10 +173,10 @@ export default async function PlatformPage() {
               <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
                 <div className="h-8 w-8 rounded-xl bg-[#1877F2]/20 flex items-center justify-center text-[#4a9eff] text-sm font-bold border border-[#1877F2]/20">f</div>
                 <div>
-                  <h2 className="text-sm font-semibold text-gray-900">Facebook</h2>
-                  <p className="text-xs text-gray-500">โพสต์ที่เผยแพร่แล้ว</p>
+                  <h2 className="text-base font-semibold text-gray-900">Facebook</h2>
+                  <p className="text-[15px] text-gray-500">โพสต์ที่เผยแพร่แล้ว</p>
                 </div>
-                <span className="ml-auto text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200 px-2.5 py-1 rounded-full">
+                <span className="ml-auto text-sm font-medium bg-gray-50 text-gray-600 border border-gray-200 px-2.5 py-1 rounded-full">
                   {facebookDrafts.length} รายการ
                 </span>
               </div>

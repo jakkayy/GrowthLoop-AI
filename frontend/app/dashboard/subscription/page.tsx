@@ -48,7 +48,7 @@ export default async function SubscriptionPage() {
 
         <main className="flex-1 p-6 overflow-y-auto">
           <div className="mb-6">
-            <p className="text-sm text-gray-500">เลือกแผนที่เหมาะกับธุรกิจของคุณ</p>
+            <p className="text-[15px] text-gray-500">เลือกแผนที่เหมาะกับธุรกิจของคุณ</p>
           </div>
           <PlanSelector currentPlan={currentPlan} />
         </main>

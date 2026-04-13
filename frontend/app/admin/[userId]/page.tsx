@@ -53,12 +53,14 @@ export default async function ClientDetailPage({
 
   const supabase = createAdminClient();
 
-  const [{ data: user }, { data: allDrafts }, { data: refImages }] = await Promise.all([
+  const [{ data: user }, { data: allDrafts }, { data: productGroups }, { data: ungroupedImages }] = await Promise.all([
     supabase.from("users").select("user_id, full_name, brand_name, caption_system_prompt, image_prompt_prefix").eq("user_id", userId).single(),
     supabase.from("post_drafts").select("id, caption, image_url, status, sent_at, created_at")
       .eq("user_id", userId).order("created_at", { ascending: false }),
-    supabase.from("reference_images").select("id, image_url, created_at")
+    supabase.from("product_groups").select("id, name, created_at, reference_images(id, image_url, created_at, group_id)")
       .eq("user_id", userId).order("created_at", { ascending: true }),
+    supabase.from("reference_images").select("id, image_url, created_at, group_id")
+      .eq("user_id", userId).is("group_id", null).order("created_at", { ascending: true }),
   ]);
 
   if (!user) notFound();
@@ -84,7 +86,7 @@ export default async function ClientDetailPage({
     <div className="p-8">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/admin" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors mb-3 group">
+        <Link href="/admin" className="inline-flex items-center gap-1.5 text-[15px] text-gray-400 hover:text-gray-700 transition-colors mb-3 group">
           <svg className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M10 12L6 8l4-4" />
           </svg>
@@ -103,7 +105,7 @@ export default async function ClientDetailPage({
         ].map((stat) => (
           <div key={stat.label} className="bg-white rounded-xl border border-gray-200 p-5">
             <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-            <p className="text-sm text-gray-500 mt-0.5">{stat.label}</p>
+            <p className="text-[15px] text-gray-500 mt-0.5">{stat.label}</p>
           </div>
         ))}
       </div>
@@ -117,7 +119,8 @@ export default async function ClientDetailPage({
       <div className="mb-6">
         <ReferenceImages
           userId={userId}
-          initialImages={refImages ?? []}
+          initialGroups={productGroups ?? []}
+          initialUngrouped={ungroupedImages ?? []}
         />
       </div>
 
@@ -153,14 +156,14 @@ export default async function ClientDetailPage({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-100">
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-xs w-16">Thumbnail</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-xs">Caption</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-xs whitespace-nowrap">Approval Status</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-xs whitespace-nowrap">Sent At</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-xs whitespace-nowrap">Response At</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-xs">Feedback</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-xs whitespace-nowrap">Facebook Status</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-xs">Action</th>
+              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm w-16">Thumbnail</th>
+              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm">Caption</th>
+              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm whitespace-nowrap">Approval Status</th>
+              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm whitespace-nowrap">Sent At</th>
+              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm whitespace-nowrap">Response At</th>
+              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm">Feedback</th>
+              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm whitespace-nowrap">Facebook Status</th>
+              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -175,7 +178,7 @@ export default async function ClientDetailPage({
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={draft.image_url} alt="post" className="h-10 w-10 rounded-lg object-cover border border-gray-200" />
                     ) : (
-                      <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-300 text-xs">
+                      <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-300 text-sm">
                         No img
                       </div>
                     )}
@@ -184,7 +187,7 @@ export default async function ClientDetailPage({
                     <p className="text-gray-700 truncate">{draft.caption || "-"}</p>
                   </td>
                   <td className="px-5 py-3">
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${approval.className}`}>
+                    <span className={`text-sm font-medium px-2.5 py-1 rounded-full border ${approval.className}`}>
                       {approval.label}
                     </span>
                   </td>
@@ -193,11 +196,11 @@ export default async function ClientDetailPage({
                   <td className="px-5 py-3 text-gray-400">-</td>
                   <td className="px-5 py-3">
                     {isPosted ? (
-                      <span className="text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full">
+                      <span className="text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full">
                         Posted
                       </span>
                     ) : (
-                      <span className="text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-full">
+                      <span className="text-sm font-medium text-gray-500 bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-full">
                         Not Posted
                       </span>
                     )}
@@ -215,7 +218,7 @@ export default async function ClientDetailPage({
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-5 py-12 text-center text-sm text-gray-400">
+                <td colSpan={8} className="px-5 py-12 text-center text-[15px] text-gray-400">
                   ไม่มีโพสต์ในหมวดนี้
                 </td>
               </tr>

@@ -51,29 +51,29 @@ export default function OwnPageInsightsSection() {
     : null;
 
   return (
-    <div className="rounded-2xl bg-white border border-gray-200 p-6">
+    <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
       <div className="flex items-start justify-between mb-5">
         <div>
-          <span className="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full tracking-wide">
+          <span className="text-sm font-bold text-blue-700 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-full tracking-wide">
             PAGE PERFORMANCE
           </span>
-          <h2 className="text-sm font-semibold text-gray-900 mt-2">วิเคราะห์เพจของลูกค้า</h2>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <h2 className="text-base font-semibold text-gray-900 mt-2">วิเคราะห์เพจของลูกค้า</h2>
+          <p className="text-[15px] text-gray-400 mt-0.5">
             ดึงโพสต์ 7 วันล่าสุด · วิเคราะห์ engagement · AI ให้แนวทาง
           </p>
         </div>
         <button
           onClick={handleAnalyze}
           disabled={analyzing}
-          className="shrink-0 rounded-xl bg-green-600 px-4 py-2 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+          className="shrink-0 rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
         >
           {analyzing ? "กำลังวิเคราะห์..." : "วิเคราะห์ตอนนี้"}
         </button>
       </div>
 
       {error && (
-        <div className="mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3">
-          <p className="text-xs text-red-600">{error}</p>
+        <div className="mb-4 rounded-xl bg-red-50 border border-red-100 px-4 py-3">
+          <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
 
@@ -83,7 +83,7 @@ export default function OwnPageInsightsSection() {
         </div>
       ) : insightLines.length > 0 ? (
         <>
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             {insightLines.map((line, i) => {
               const num = String(i + 1).padStart(2, "0");
               const colonIdx = line.indexOf(":");
@@ -91,27 +91,27 @@ export default function OwnPageInsightsSection() {
               const title = hasColon ? line.substring(0, colonIdx).trim() : line;
               const desc = hasColon ? line.substring(colonIdx + 1).trim() : "";
               return (
-                <div key={i} className="flex gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                  <span className="text-xs font-bold text-blue-600 shrink-0 mt-0.5 w-5">{num}</span>
+                <div key={i} className="flex gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-blue-100 hover:bg-blue-50/30 transition-colors">
+                  <span className="text-sm font-bold text-blue-500 shrink-0 mt-0.5 w-5">{num}</span>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 leading-snug">{title}</p>
-                    {desc && <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{desc}</p>}
+                    <p className="text-[15px] font-semibold text-gray-800 leading-snug">{title}</p>
+                    {desc && <p className="text-sm text-gray-400 mt-0.5 leading-relaxed">{desc}</p>}
                   </div>
                 </div>
               );
             })}
           </div>
           {formattedDate && (
-            <p className="mt-3 text-xs text-gray-400">วิเคราะห์ล่าสุด: {formattedDate}</p>
+            <p className="mt-3 text-sm text-gray-400">วิเคราะห์ล่าสุด: {formattedDate}</p>
           )}
         </>
       ) : (
         <div className="flex flex-col items-center justify-center py-10 text-center">
-          <div className="h-12 w-12 rounded-2xl bg-gray-100 flex items-center justify-center mb-3">
+          <div className="h-12 w-12 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-3">
             <span className="text-2xl">📊</span>
           </div>
-          <p className="text-sm font-medium text-gray-500">ยังไม่มีข้อมูลวิเคราะห์</p>
-          <p className="text-xs text-gray-400 mt-1">กด "วิเคราะห์ตอนนี้" เพื่อดึงข้อมูล<br />โพสต์ 7 วันล่าสุดจากเพจที่เชื่อมต่อ</p>
+          <p className="text-[15px] font-medium text-gray-500">ยังไม่มีข้อมูลวิเคราะห์</p>
+          <p className="text-sm text-gray-400 mt-1">กด "วิเคราะห์ตอนนี้" เพื่อดึงข้อมูล<br />โพสต์ 7 วันล่าสุดจากเพจที่เชื่อมต่อ</p>
         </div>
       )}
     </div>

@@ -45,7 +45,25 @@ export class ContentService {
     return data ?? { brand_name: null, business_type: null, description: null, target: null, tone_brand: null, ci_color: null, market_goal: null, caption_system_prompt: null, image_prompt_prefix: null };
   }
 
-  private async getRandomReferenceImageUrl(userId: string): Promise<string | null> {
+  private async getRandomGroupReferenceUrls(userId: string): Promise<string[]> {
+    // ดึง groups ที่มีรูปอยู่
+    const { data: groups } = await this.supabase
+      .from('product_groups')
+      .select('id')
+      .eq('user_id', userId);
+
+    if (groups && groups.length > 0) {
+      const randomGroup = groups[Math.floor(Math.random() * groups.length)];
+      const { data: images } = await this.supabase
+        .from('reference_images')
+        .select('image_url')
+        .eq('user_id', userId)
+        .eq('group_id', randomGroup.id);
+      const urls = (images ?? []).map((r) => r.image_url);
+      if (urls.length > 0) return urls;
+    }
+
+    // fallback: ไม่มี group — random 1 รูปจากทั้งหมด (พฤติกรรมเดิม)
     const { data } = await this.supabase
       .from('reference_images')
       .select('image_url')
@@ -53,8 +71,8 @@ export class ContentService {
       .order('created_at', { ascending: true })
       .limit(5);
     const urls = (data ?? []).map((r) => r.image_url);
-    if (urls.length === 0) return null;
-    return urls[Math.floor(Math.random() * urls.length)];
+    if (urls.length === 0) return [];
+    return [urls[Math.floor(Math.random() * urls.length)]];
   }
 
   private async getLatestInsights(userId: string): Promise<string | null> {
@@ -129,10 +147,10 @@ ${insights ? `[แนวทางจากการวิเคราะห์�
   // generate เพื่อ preview เท่านั้น — ไม่บันทึก DB (ใช้โดย test endpoint)
   async generatePreview(input: { userId: string; topic?: string }) {
     const topic = input.topic ?? 'โปรโมทสินค้าและบริการ';
-    const [profile, insights, referenceImageUrl] = await Promise.all([
+    const [profile, insights, referenceUrls] = await Promise.all([
       this.getUserBrandProfile(input.userId),
       this.getLatestInsights(input.userId),
-      this.getRandomReferenceImageUrl(input.userId),
+      this.getRandomGroupReferenceUrls(input.userId),
     ]);
 
     const { caption } = await this.aiService.generateCaption(
@@ -142,7 +160,7 @@ ${insights ? `[แนวทางจากการวิเคราะห์�
 
     const { imageDataUrl } = await this.aiService.generateImage(
       this.buildImagePrompt(caption, profile),
-      referenceImageUrl ? [referenceImageUrl] : undefined,
+      referenceUrls.length > 0 ? referenceUrls : undefined,
     );
 
     const imageUrl = await this.storageService.saveDataUrlAsPublicImage(imageDataUrl);
@@ -153,10 +171,10 @@ ${insights ? `[แนวทางจากการวิเคราะห์�
   // generate + บันทึก DB (ใช้โดย scheduler ตี 6)
   async generateAndSave(input: { userId: string; lineUserId: string; topic?: string }) {
     const topic = input.topic ?? 'โปรโมทสินค้าและบริการ';
-    const [profile, insights, referenceImageUrl] = await Promise.all([
+    const [profile, insights, referenceUrls] = await Promise.all([
       this.getUserBrandProfile(input.userId),
       this.getLatestInsights(input.userId),
-      this.getRandomReferenceImageUrl(input.userId),
+      this.getRandomGroupReferenceUrls(input.userId),
     ]);
 
     const { caption } = await this.aiService.generateCaption(
@@ -166,7 +184,7 @@ ${insights ? `[แนวทางจากการวิเคราะห์�
 
     const { imageDataUrl } = await this.aiService.generateImage(
       this.buildImagePrompt(caption, profile),
-      referenceImageUrl ? [referenceImageUrl] : undefined,
+      referenceUrls.length > 0 ? referenceUrls : undefined,
     );
 
     const imageUrl =
@@ -184,12 +202,12 @@ ${insights ? `[แนวทางจากการวิเคราะห์�
 
   // generate + ส่ง LINE ทันที (ใช้สำหรับ test)
   async generateAndSendToLine(input: { lineUserId: string; topic: string; userId?: string }) {
-    const [profile, insights, referenceImageUrl] = await Promise.all([
+    const [profile, insights, referenceUrls] = await Promise.all([
       input.userId
         ? this.getUserBrandProfile(input.userId)
         : Promise.resolve({ brand_name: null, business_type: null, description: null, target: null, tone_brand: null, ci_color: null, market_goal: null, caption_system_prompt: null, image_prompt_prefix: null }),
       input.userId ? this.getLatestInsights(input.userId) : Promise.resolve(null),
-      input.userId ? this.getRandomReferenceImageUrl(input.userId) : Promise.resolve(null),
+      input.userId ? this.getRandomGroupReferenceUrls(input.userId) : Promise.resolve([]),
     ]);
 
     const { caption } = await this.aiService.generateCaption(
@@ -199,7 +217,7 @@ ${insights ? `[แนวทางจากการวิเคราะห์�
 
     const { imageDataUrl } = await this.aiService.generateImage(
       this.buildImagePrompt(caption, profile),
-      referenceImageUrl ? [referenceImageUrl] : undefined,
+      referenceUrls.length > 0 ? referenceUrls : undefined,
     );
 
     const imageUrl =

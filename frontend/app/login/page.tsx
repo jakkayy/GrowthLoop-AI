@@ -43,7 +43,7 @@ export default function LoginPage() {
       <div className="absolute top-5 left-6 z-20">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-600 transition-colors"
+          className="inline-flex items-center gap-1.5 text-[15px] text-gray-500 hover:text-green-600 transition-colors"
         >
           ← กลับหน้าหลัก
         </Link>
@@ -65,7 +65,7 @@ export default function LoginPage() {
 
         <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
           <h1 className="mb-1 text-2xl font-bold text-gray-900">เข้าสู่ระบบ</h1>
-          <p className="mb-6 text-sm text-gray-500">ยินดีต้อนรับกลับมา</p>
+          <p className="mb-6 text-[15px] text-gray-500">ยินดีต้อนรับกลับมา</p>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
@@ -107,7 +107,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-5 text-center text-sm text-gray-500">
+          <p className="mt-5 text-center text-[15px] text-gray-500">
             ยังไม่มีบัญชี?{" "}
             <Link href="/register" className="font-semibold text-green-600 hover:text-green-700">
               สมัครสมาชิก
@@ -115,7 +115,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <p className="mt-6 text-center text-xs text-gray-400">
+        <p className="mt-6 text-center text-[15px] text-gray-400">
           © 2026 AXIS. All rights reserved.
         </p>
       </div>

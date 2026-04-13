@@ -40,7 +40,7 @@ export default function TestGenerate({ userId }: { userId: string }) {
     <div className="bg-white rounded-xl border border-gray-200 p-6">
       <div className="mb-5">
         <h2 className="text-base font-semibold text-gray-900">Test Generate</h2>
-        <p className="text-sm text-gray-500 mt-0.5">
+        <p className="text-[15px] text-gray-500 mt-0.5">
           ทดสอบสร้างรูปและแคปชั่น — ใช้ reference images และ prompt ของร้านนี้จริง ไม่บันทึกเป็น draft
         </p>
       </div>
@@ -81,7 +81,7 @@ export default function TestGenerate({ userId }: { userId: string }) {
         <div className="grid grid-cols-2 gap-5">
           {/* Image */}
           <div>
-            <p className="text-xs font-medium text-gray-500 mb-2">Generated Image</p>
+            <p className="text-sm font-medium text-gray-500 mb-2">Generated Image</p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={result.imageUrl}
@@ -92,13 +92,13 @@ export default function TestGenerate({ userId }: { userId: string }) {
 
           {/* Caption */}
           <div className="flex flex-col">
-            <p className="text-xs font-medium text-gray-500 mb-2">Generated Caption</p>
+            <p className="text-sm font-medium text-gray-500 mb-2">Generated Caption</p>
             <div className="flex-1 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 whitespace-pre-wrap overflow-y-auto max-h-80">
               {result.caption}
             </div>
             <button
               onClick={() => navigator.clipboard.writeText(result.caption)}
-              className="mt-2 text-xs text-gray-400 hover:text-gray-600 text-right transition-colors"
+              className="mt-2 text-[15px] text-gray-400 hover:text-gray-600 text-right transition-colors"
             >
               Copy caption
             </button>

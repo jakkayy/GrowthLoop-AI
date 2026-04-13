@@ -40,7 +40,7 @@ export default async function AdminPage() {
         <div className="px-5 py-3 border-b border-gray-100">
           <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 w-64">
             <SearchIcon />
-            <span className="text-sm text-gray-400">Search clients...</span>
+            <span className="text-[15px] text-gray-400">Search clients...</span>
           </div>
         </div>
 
@@ -48,11 +48,11 @@ export default async function AdminPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-100">
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-xs">Client Name</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-xs">Plan</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-xs">Status</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-xs">Last Updated</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-xs">Action</th>
+              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm">Client Name</th>
+              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm">Plan</th>
+              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm">Status</th>
+              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm">Last Updated</th>
+              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -67,12 +67,12 @@ export default async function AdminPage() {
                   <td className="px-5 py-3.5 text-gray-400">-</td>
                   <td className="px-5 py-3.5">
                     {isActive ? (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
+                      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
                         <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
                         Active
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-full">
+                      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-full">
                         <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
                         Inactive
                       </span>
@@ -92,7 +92,7 @@ export default async function AdminPage() {
             })}
             {(users ?? []).length === 0 && (
               <tr>
-                <td colSpan={5} className="px-5 py-12 text-center text-sm text-gray-400">
+                <td colSpan={5} className="px-5 py-12 text-center text-[15px] text-gray-400">
                   ไม่มีข้อมูล
                 </td>
               </tr>

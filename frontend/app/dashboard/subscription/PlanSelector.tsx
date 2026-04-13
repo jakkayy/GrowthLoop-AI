@@ -100,7 +100,7 @@ export default function PlanSelector({ currentPlan }: { currentPlan: Plan }) {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <p className="text-base font-bold text-gray-900">{plan.name}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{plan.description}</p>
+                  <p className="text-[15px] text-gray-500 mt-0.5">{plan.description}</p>
                 </div>
                 <div className={`mt-0.5 h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
                   isActive ? "border-green-500 bg-green-500" : "border-gray-300"
@@ -129,7 +129,7 @@ export default function PlanSelector({ currentPlan }: { currentPlan: Plan }) {
               </ul>
 
               {isCurrent && (
-                <div className="mt-4 text-xs text-green-600 font-medium bg-green-100 rounded-full px-3 py-1 inline-block">
+                <div className="mt-4 text-sm text-green-600 font-medium bg-green-100 rounded-full px-3 py-1 inline-block">
                   แผนปัจจุบัน
                 </div>
               )}
@@ -151,7 +151,7 @@ export default function PlanSelector({ currentPlan }: { currentPlan: Plan }) {
           <p className="text-sm text-green-600 font-medium">เปลี่ยนแผนสำเร็จแล้ว</p>
         )}
         {!isChanged && !success && (
-          <p className="text-sm text-gray-400">เลือกแผนอื่นเพื่อเปลี่ยน</p>
+          <p className="text-[15px] text-gray-400">เลือกแผนอื่นเพื่อเปลี่ยน</p>
         )}
       </div>
     </div>

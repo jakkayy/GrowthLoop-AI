@@ -16,7 +16,7 @@ export default function TestPage({ users }: { users: User[] }) {
     <div className="p-8">
       <div className="mb-6">
         <h1 className="text-xl font-bold text-gray-900">Test Generate</h1>
-        <p className="text-sm text-gray-500 mt-1">ทดสอบสร้างรูปและแคปชั่นต่อร้าน</p>
+        <p className="text-[15px] text-gray-500 mt-1">ทดสอบสร้างรูปและแคปชั่นต่อร้าน</p>
       </div>
 
       <div className="mb-6">
@@ -38,7 +38,7 @@ export default function TestPage({ users }: { users: User[] }) {
       {selectedUserId ? (
         <TestGenerate userId={selectedUserId} />
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-sm text-gray-400">
+        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-[15px] text-gray-400">
           เลือกร้านด้านบนเพื่อเริ่มทดสอบ
         </div>
       )}

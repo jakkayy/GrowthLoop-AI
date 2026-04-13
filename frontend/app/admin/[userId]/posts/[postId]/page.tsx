@@ -43,13 +43,13 @@ export default async function PostDetailPage({
     <div className="p-8 max-w-3xl mx-auto">
       {/* Breadcrumb */}
       <div className="mb-6">
-        <Link href={`/admin/${userId}`} className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors mb-3 group">
+        <Link href={`/admin/${userId}`} className="inline-flex items-center gap-1.5 text-[15px] text-gray-400 hover:text-gray-700 transition-colors mb-3 group">
           <svg className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M10 12L6 8l4-4" />
           </svg>
           {clientName}
         </Link>
-        <div className="flex items-center gap-1.5 text-xs text-gray-400">
+        <div className="flex items-center gap-1.5 text-[15px] text-gray-400">
           <Link href="/admin" className="hover:text-gray-600 transition-colors">Clients</Link>
           <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 9l3-3-3-3" />
@@ -77,26 +77,26 @@ export default async function PostDetailPage({
         <div className="p-6 space-y-5">
           {/* Caption */}
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Caption</p>
+            <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Caption</p>
             <p className="text-sm text-gray-700 leading-relaxed">{draft.caption || "-"}</p>
           </div>
 
           {/* Status row */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Approval Status</p>
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${approval.className}`}>
+              <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Approval Status</p>
+              <span className={`text-sm font-medium px-2.5 py-1 rounded-full border ${approval.className}`}>
                 {approval.label}
               </span>
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Facebook Status</p>
+              <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Facebook Status</p>
               {isPosted ? (
-                <span className="text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full">
+                <span className="text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full">
                   Posted
                 </span>
               ) : (
-                <span className="text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-full">
+                <span className="text-sm font-medium text-gray-500 bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-full">
                   Not Posted
                 </span>
               )}
@@ -108,19 +108,19 @@ export default async function PostDetailPage({
           {/* Time row */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">LINE Sent At</p>
+              <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-1.5">LINE Sent At</p>
               <p className="text-sm text-gray-700">{formatDateTime(draft.sent_at)}</p>
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Response At</p>
-              <p className="text-sm text-gray-400">-</p>
+              <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Response At</p>
+              <p className="text-[15px] text-gray-400">-</p>
             </div>
           </div>
 
           {/* Feedback */}
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Feedback</p>
-            <p className="text-sm text-gray-400">-</p>
+            <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Feedback</p>
+            <p className="text-[15px] text-gray-400">-</p>
           </div>
 
           <div className="border-t border-gray-100" />
@@ -128,12 +128,12 @@ export default async function PostDetailPage({
           {/* Facebook info */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Facebook Posted At</p>
-              <p className="text-sm text-gray-400">-</p>
+              <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Facebook Posted At</p>
+              <p className="text-[15px] text-gray-400">-</p>
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Facebook URL</p>
-              <p className="text-sm text-gray-400">-</p>
+              <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Facebook URL</p>
+              <p className="text-[15px] text-gray-400">-</p>
             </div>
           </div>
         </div>

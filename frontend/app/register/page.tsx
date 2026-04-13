@@ -64,7 +64,7 @@ export default function RegisterPage() {
     <main className="min-h-screen bg-gray-50 flex items-center justify-center p-6 relative overflow-hidden">
       {/* Back button */}
       <div className="absolute top-5 left-6 z-20">
-        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-600 transition-colors">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-[15px] text-gray-500 hover:text-green-600 transition-colors">
           ← กลับหน้าหลัก
         </Link>
       </div>
@@ -83,13 +83,13 @@ export default function RegisterPage() {
 
         <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
           <h1 className="mb-1 text-2xl font-bold text-gray-900">สมัครสมาชิก</h1>
-          <p className="mb-8 text-sm text-gray-500">กรอกข้อมูลบัญชีและข้อมูลแบรนด์ของคุณ</p>
+          <p className="mb-8 text-[15px] text-gray-500">กรอกข้อมูลบัญชีและข้อมูลแบรนด์ของคุณ</p>
 
           <form onSubmit={handleRegister} className="space-y-8">
             {/* Account Section */}
             <div>
               <div className="flex items-center gap-3 mb-5">
-                <div className="h-6 w-6 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-bold">1</div>
+                <div className="h-6 w-6 rounded-full bg-green-600 flex items-center justify-center text-white text-sm font-bold">1</div>
                 <h2 className="text-base font-semibold text-gray-900">ข้อมูลบัญชี</h2>
               </div>
               <div className="space-y-4">
@@ -115,7 +115,7 @@ export default function RegisterPage() {
             {/* Brand Section */}
             <div>
               <div className="flex items-center gap-3 mb-5">
-                <div className="h-6 w-6 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-bold">2</div>
+                <div className="h-6 w-6 rounded-full bg-green-600 flex items-center justify-center text-white text-sm font-bold">2</div>
                 <h2 className="text-base font-semibold text-gray-900">ข้อมูลแบรนด์</h2>
               </div>
               <div className="space-y-4">
@@ -207,7 +207,7 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <p className="mt-5 text-center text-sm text-gray-500">
+          <p className="mt-5 text-center text-[15px] text-gray-500">
             มีบัญชีแล้ว?{" "}
             <Link href="/login" className="font-semibold text-green-600 hover:text-green-700">
               เข้าสู่ระบบ
@@ -215,7 +215,7 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <p className="mt-6 text-center text-xs text-gray-400">
+        <p className="mt-6 text-center text-[15px] text-gray-400">
           © 2026 AXIS. All rights reserved.
         </p>
       </div>

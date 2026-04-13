@@ -6,7 +6,7 @@ export default function FacebookPage() {
           <span className="text-emerald-400 text-xl">✓</span>
         </div>
         <h1 className="text-xl font-bold text-white mb-2">Facebook connected</h1>
-        <p className="text-sm text-gray-500">เชื่อมต่อสำเร็จแล้ว</p>
+        <p className="text-[15px] text-gray-500">เชื่อมต่อสำเร็จแล้ว</p>
       </div>
     </main>
   );

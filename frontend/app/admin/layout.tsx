@@ -9,7 +9,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="px-5 py-5 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-green-600 flex items-center justify-center">
-              <span className="text-white text-xs font-bold">A</span>
+              <span className="text-white text-sm font-bold">A</span>
             </div>
             <p className="text-sm font-bold text-gray-900">AXIS</p>
           </div>

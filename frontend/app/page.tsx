@@ -7,7 +7,7 @@ export default function LandingPage() {
       <nav className="flex items-center justify-between px-8 py-5 border-b border-gray-100">
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-lg bg-green-600 flex items-center justify-center">
-            <span className="text-white text-xs font-bold">A</span>
+            <span className="text-white text-sm font-bold">A</span>
           </div>
           <span className="text-lg font-bold tracking-wide text-gray-900">AXIS</span>
         </div>
@@ -36,7 +36,7 @@ export default function LandingPage() {
         <div className="pointer-events-none absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-teal-200/40 blur-[100px]" />
 
         <div className="relative z-10 flex flex-col items-center gap-6 max-w-3xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-1.5 text-xs font-medium text-green-700">
+          <div className="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-1.5 text-sm font-medium text-green-700">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
             AI-Powered Marketing Platform
           </div>
@@ -78,7 +78,7 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <p className="text-xs text-gray-400 mt-1">ไม่ต้องใช้บัตรเครดิต · เริ่มใช้งานได้เลย</p>
+          <p className="text-[15px] text-gray-400 mt-1">ไม่ต้องใช้บัตรเครดิต · เริ่มใช้งานได้เลย</p>
         </div>
       </section>
 
@@ -87,7 +87,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-2xl font-bold text-gray-900">ทุกอย่างที่ธุรกิจคุณต้องการ</h2>
-            <p className="mt-2 text-sm text-gray-500">จัดการ Marketing ได้ครบในที่เดียว</p>
+            <p className="mt-2 text-[15px] text-gray-500">จัดการ Marketing ได้ครบในที่เดียว</p>
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
             <FeatureCard
@@ -133,7 +133,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 px-8 py-6 text-center text-xs text-gray-400">
+      <footer className="border-t border-gray-100 px-8 py-6 text-center text-[15px] text-gray-400">
         © 2026 AXIS. All rights reserved.
       </footer>
     </div>
@@ -146,8 +146,8 @@ function FeatureCard({ icon, title, desc }: { icon: string; title: string; desc:
       <div className="h-9 w-9 rounded-xl bg-green-100 flex items-center justify-center">
         <span className="text-green-600 text-base">{icon}</span>
       </div>
-      <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-      <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
+      <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+      <p className="text-[15px] text-gray-500 leading-relaxed">{desc}</p>
     </div>
   );
 }

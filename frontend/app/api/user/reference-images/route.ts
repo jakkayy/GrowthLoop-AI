@@ -16,7 +16,7 @@ async function getUserId(): Promise<string | null> {
   }
 }
 
-// GET — list reference images for current user
+// GET — list reference images for current user (ungrouped only)
 export async function GET() {
   const userId = await getUserId();
   if (!userId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -24,8 +24,9 @@ export async function GET() {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("reference_images")
-    .select("id, image_url, created_at")
+    .select("id, image_url, created_at, group_id")
     .eq("user_id", userId)
+    .is("group_id", null)
     .order("created_at", { ascending: true });
 
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
+  const groupId = formData.get("group_id") as string | null;
 
   if (!file) return NextResponse.json({ message: "No file" }, { status: 400 });
 
@@ -58,8 +60,8 @@ export async function POST(req: Request) {
 
   const { data, error: dbError } = await supabase
     .from("reference_images")
-    .insert({ user_id: userId, image_url: publicUrl, storage_path: storagePath })
-    .select("id, image_url, created_at")
+    .insert({ user_id: userId, image_url: publicUrl, storage_path: storagePath, group_id: groupId ?? null })
+    .select("id, image_url, created_at, group_id")
     .single();
 
   if (dbError) return NextResponse.json({ message: dbError.message }, { status: 500 });

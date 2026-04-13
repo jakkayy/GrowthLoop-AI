@@ -50,7 +50,7 @@ export default function PromptSettings({
     <div className="bg-white rounded-xl border border-gray-200 p-6">
       <div className="mb-5">
         <h2 className="text-base font-semibold text-gray-900">Prompt Settings</h2>
-        <p className="text-sm text-gray-500 mt-0.5">
+        <p className="text-[15px] text-gray-500 mt-0.5">
           ปล่อยว่างเพื่อใช้ default prompt ของระบบ
         </p>
       </div>
@@ -61,7 +61,7 @@ export default function PromptSettings({
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             Caption System Prompt
           </label>
-          <p className="text-xs text-gray-400 mb-2">
+          <p className="text-[15px] text-gray-400 mb-2">
             กำหนดบุคลิกและสไตล์การเขียนแคปชั่นของ AI สำหรับร้านนี้
           </p>
           <textarea
@@ -78,7 +78,7 @@ export default function PromptSettings({
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             Image Prompt Prefix
           </label>
-          <p className="text-xs text-gray-400 mb-2">
+          <p className="text-[15px] text-gray-400 mb-2">
             ประโยคนำก่อนแคปชั่นในการสร้างรูป เช่น{" "}
             <span className="font-mono bg-gray-100 px-1 rounded">
               Create a minimalist product photo for

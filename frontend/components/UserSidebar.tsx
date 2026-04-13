@@ -42,7 +42,7 @@ export default function UserSidebar({ activePage, logoutAction }: UserSidebarPro
           </div>
           <div>
             <p className="text-gray-900 text-sm font-bold leading-tight">AXIS</p>
-            <p className="text-[10px] text-green-600/70 tracking-widest">AI MARKETING</p>
+            <p className="text-sm text-green-600/70 tracking-widest">AI MARKETING</p>
           </div>
         </div>
       </div>
