@@ -124,22 +124,40 @@ export class DraftsService {
     return (count ?? 0) > 0;
   }
 
+  async savePostId(draftId: string, facebookPostId: string) {
+    const { error } = await this.supabase
+      .from('post_drafts')
+      .update({ facebook_post_id: facebookPostId })
+      .eq('id', draftId);
+    if (error) throw new Error(error.message);
+  }
+
   async getAllActiveUsers(): Promise<
-    { user_id: string; line_user_id: string; generate_time: string; post_time: string }[]
+    { user_id: string; line_user_id: string; generate_time: string; post_time: string; report_time: string | null }[]
   > {
     const { data, error } = await this.supabase
       .from('line_connections')
-      .select('user_id, line_user_id, users!inner(generate_time, post_time)')
-      .eq('status', 'active');
+      .select('user_id, line_user_id, users!inner(generate_time, post_time, report_time)')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
 
     if (error) throw new Error(error.message);
 
-    return (data ?? []).map((row: any) => ({
-      user_id: row.user_id,
-      line_user_id: row.line_user_id,
-      generate_time: row.users?.generate_time ?? '06:00',
-      post_time: row.users?.post_time ?? '10:00',
-    }));
+    // deduplicate by user_id — เอา 1 row ต่อ user เผื่อมี duplicate active rows
+    const seen = new Set<string>();
+    return (data ?? [])
+      .filter((row: any) => {
+        if (seen.has(row.user_id)) return false;
+        seen.add(row.user_id);
+        return true;
+      })
+      .map((row: any) => ({
+        user_id: row.user_id,
+        line_user_id: row.line_user_id,
+        generate_time: row.users?.generate_time ?? '06:00',
+        post_time: row.users?.post_time ?? '10:00',
+        report_time: row.users?.report_time ?? null,
+      }));
   }
 
   async getApprovedWithSchedule(): Promise<

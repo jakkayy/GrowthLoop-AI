@@ -30,6 +30,7 @@ type User = {
   created_at: string;
   generate_time: string;
   post_time: string;
+  report_time: string | null;
 };
 
 type LineConnection = {
@@ -68,7 +69,7 @@ async function getUser(): Promise<User> {
   const { data, error } = await supabase
     .from("users")
     .select(
-      "user_id, full_name, email, brand_name, business_type, description, target, tone_brand, ci_color, market_goal, created_at, generate_time, post_time"
+      "user_id, full_name, email, brand_name, business_type, description, target, tone_brand, ci_color, market_goal, created_at, generate_time, post_time, report_time"
     )
     .eq("user_id", userId)
     .single();
@@ -293,6 +294,7 @@ export default async function DashboardPage() {
               <ScheduleForm
                 initialGenerateTime={user.generate_time ?? "06:00"}
                 initialPostTime={user.post_time ?? "10:00"}
+                initialReportTime={user.report_time ?? "20:00"}
               />
 
               {/* Own Page Insights */}

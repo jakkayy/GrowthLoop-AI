@@ -4,6 +4,7 @@ import { ContentService } from '../content/content.service';
 import { LineService } from '../line/line.service';
 import { DraftsService } from '../drafts/drafts.service';
 import { FacebookPostService } from '../facebook/facebook-post.service';
+import { EngagementReportService } from '../facebook/engagement-report.service';
 import { CompetitorsService } from '../competitors/competitors.service';
 
 function currentHHMM(): string {
@@ -26,6 +27,7 @@ export class SchedulerService {
     private readonly lineService: LineService,
     private readonly draftsService: DraftsService,
     private readonly facebookPostService: FacebookPostService,
+    private readonly engagementReportService: EngagementReportService,
     private readonly competitorsService: CompetitorsService,
   ) {}
 
@@ -82,11 +84,14 @@ const targets = users.filter((u) => u.generate_time === now);
         const claimed = await this.draftsService.claimForPosting(draft.id);
         if (!claimed) continue; // อีก instance claim ไปก่อนแล้ว
 
-        await this.facebookPostService.postToPages({
+        const postId = await this.facebookPostService.postToPages({
           userId: draft.user_id,
           caption: draft.caption,
           imageUrl: draft.image_url,
         });
+        if (postId) {
+          await this.draftsService.savePostId(draft.id, postId);
+        }
         this.logger.log(`Draft ${draft.id} posted successfully`);
       } catch (err) {
         this.logger.error(`Failed to post draft ${draft.id}: ${String(err)}`);
@@ -98,6 +103,32 @@ const targets = users.filter((u) => u.generate_time === now);
   @Cron('*/5 * * * *')
   async expireOverdueDrafts() {
     await this.draftsService.expireOverdue();
+  }
+
+  // ทุก 1 นาที — ส่งรายงาน engagement รายวันให้ user ที่ถึงเวลา report_time
+  @Cron('* * * * *')
+  async sendDailyReportBySchedule() {
+    const now = currentHHMM();
+    const users = await this.draftsService.getAllActiveUsers();
+    const targets = users.filter((u) => u.report_time === now);
+    if (targets.length === 0) return;
+
+    this.logger.log(
+      `[${now}] Sending engagement report for ${targets.length} user(s)`,
+    );
+
+    for (const user of targets) {
+      try {
+        await this.engagementReportService.sendDailyReport(
+          user.user_id,
+          user.line_user_id,
+        );
+      } catch (err) {
+        this.logger.error(
+          `Failed to send report for user ${user.user_id}: ${String(err)}`,
+        );
+      }
+    }
   }
 
   // ทุกจันทร์ 08:00 (Asia/Bangkok) — scrape คู่แข่งอัตโนมัติรายสัปดาห์
