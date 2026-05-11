@@ -37,10 +37,10 @@ export default function TestGenerate({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6">
+    <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6">
       <div className="mb-5">
-        <h2 className="text-base font-semibold text-gray-900">Test Generate</h2>
-        <p className="text-[15px] text-gray-500 mt-0.5">
+        <h2 className="text-base font-semibold text-zinc-50">Test Generate</h2>
+        <p className="text-[15px] text-zinc-500 mt-0.5">
           ทดสอบสร้างรูปและแคปชั่น — ใช้ reference images และ prompt ของร้านนี้จริง ไม่บันทึกเป็น draft
         </p>
       </div>
@@ -52,12 +52,12 @@ export default function TestGenerate({ userId }: { userId: string }) {
           onChange={(e) => setTopic(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && !loading && handleGenerate()}
           placeholder="หัวข้อโพสต์ (ปล่อยว่าง = โปรโมทสินค้าและบริการ)"
-          className="flex-1 rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
         />
         <button
           onClick={handleGenerate}
           disabled={loading}
-          className="px-4 py-2.5 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap flex items-center gap-2"
+          className="px-4 py-2.5 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap flex items-center gap-2"
         >
           {loading ? (
             <>
@@ -72,7 +72,7 @@ export default function TestGenerate({ userId }: { userId: string }) {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
           {error}
         </div>
       )}
@@ -81,24 +81,24 @@ export default function TestGenerate({ userId }: { userId: string }) {
         <div className="grid grid-cols-2 gap-5">
           {/* Image */}
           <div>
-            <p className="text-sm font-medium text-gray-500 mb-2">Generated Image</p>
+            <p className="text-sm font-medium text-zinc-500 mb-2">Generated Image</p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={result.imageUrl}
               alt="generated"
-              className="w-full rounded-xl border border-gray-200 object-cover"
+              className="w-full rounded-xl border border-zinc-700 object-cover"
             />
           </div>
 
           {/* Caption */}
           <div className="flex flex-col">
-            <p className="text-sm font-medium text-gray-500 mb-2">Generated Caption</p>
-            <div className="flex-1 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 whitespace-pre-wrap overflow-y-auto max-h-80">
+            <p className="text-sm font-medium text-zinc-500 mb-2">Generated Caption</p>
+            <div className="flex-1 rounded-xl border border-zinc-700 bg-zinc-800 p-4 text-sm text-zinc-300 whitespace-pre-wrap overflow-y-auto max-h-80">
               {result.caption}
             </div>
             <button
               onClick={() => navigator.clipboard.writeText(result.caption)}
-              className="mt-2 text-[15px] text-gray-400 hover:text-gray-600 text-right transition-colors"
+              className="mt-2 text-[15px] text-zinc-500 hover:text-zinc-300 text-right transition-colors"
             >
               Copy caption
             </button>

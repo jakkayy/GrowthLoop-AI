@@ -17,12 +17,12 @@ type Draft = {
 type Tab = "all" | "approved" | "denied" | "pending";
 
 const APPROVAL_BADGE: Record<string, { label: string; className: string }> = {
-  approved: { label: "Approved", className: "text-green-700 bg-green-50 border-green-200" },
-  posted:   { label: "Approved", className: "text-green-700 bg-green-50 border-green-200" },
-  denied:   { label: "Denied",   className: "text-red-600 bg-red-50 border-red-200" },
-  pending:  { label: "Pending",  className: "text-yellow-700 bg-yellow-50 border-yellow-200" },
-  sent:     { label: "Pending",  className: "text-yellow-700 bg-yellow-50 border-yellow-200" },
-  expired:  { label: "Expired",  className: "text-orange-700 bg-orange-50 border-orange-200" },
+  approved: { label: "Approved", className: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
+  posted:   { label: "Approved", className: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
+  denied:   { label: "Denied",   className: "text-red-400 bg-red-500/10 border-red-500/20" },
+  pending:  { label: "Pending",  className: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
+  sent:     { label: "Pending",  className: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
+  expired:  { label: "Expired",  className: "text-orange-400 bg-orange-500/10 border-orange-500/20" },
 };
 
 function formatDateTime(iso: string | null) {
@@ -86,13 +86,13 @@ export default async function ClientDetailPage({
     <div className="p-8">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/admin" className="inline-flex items-center gap-1.5 text-[15px] text-gray-400 hover:text-gray-700 transition-colors mb-3 group">
+        <Link href="/admin" className="inline-flex items-center gap-1.5 text-[15px] text-zinc-500 hover:text-zinc-300 transition-colors mb-3 group">
           <svg className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M10 12L6 8l4-4" />
           </svg>
           Clients
         </Link>
-        <h1 className="text-xl font-bold text-gray-900">{clientName}</h1>
+        <h1 className="text-xl font-bold text-zinc-50">{clientName}</h1>
       </div>
 
       {/* Stats */}
@@ -103,9 +103,9 @@ export default async function ClientDetailPage({
           { label: "Denied",             value: totalDenied   },
           { label: "Posted to Facebook", value: totalPosted   },
         ].map((stat) => (
-          <div key={stat.label} className="bg-white rounded-xl border border-gray-200 p-5">
-            <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-            <p className="text-[15px] text-gray-500 mt-0.5">{stat.label}</p>
+          <div key={stat.label} className="bg-zinc-900 rounded-xl border border-zinc-800 p-5">
+            <p className="text-2xl font-bold text-zinc-50">{stat.value}</p>
+            <p className="text-[15px] text-zinc-500 mt-0.5">{stat.label}</p>
           </div>
         ))}
       </div>
@@ -134,17 +134,17 @@ export default async function ClientDetailPage({
       </div>
 
       {/* Table card */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
         {/* Tabs */}
-        <div className="flex border-b border-gray-100 px-5">
+        <div className="flex border-b border-zinc-800 px-5">
           {TABS.map(({ key, label }) => (
             <Link
               key={key}
               href={`/admin/${userId}?tab=${key}`}
               className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
                 tab === key
-                  ? "border-green-600 text-green-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
+                  ? "border-violet-500 text-violet-400"
+                  : "border-transparent text-zinc-500 hover:text-zinc-300"
               }`}
             >
               {label}
@@ -155,52 +155,52 @@ export default async function ClientDetailPage({
         {/* Table */}
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm w-16">Thumbnail</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm">Caption</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm whitespace-nowrap">Approval Status</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm whitespace-nowrap">Sent At</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm whitespace-nowrap">Response At</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm">Feedback</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm whitespace-nowrap">Facebook Status</th>
-              <th className="text-left px-5 py-3 font-medium text-gray-500 text-sm">Action</th>
+            <tr className="border-b border-zinc-800">
+              <th className="text-left px-5 py-3 font-medium text-zinc-500 text-sm w-16">Thumbnail</th>
+              <th className="text-left px-5 py-3 font-medium text-zinc-500 text-sm">Caption</th>
+              <th className="text-left px-5 py-3 font-medium text-zinc-500 text-sm whitespace-nowrap">Approval Status</th>
+              <th className="text-left px-5 py-3 font-medium text-zinc-500 text-sm whitespace-nowrap">Sent At</th>
+              <th className="text-left px-5 py-3 font-medium text-zinc-500 text-sm whitespace-nowrap">Response At</th>
+              <th className="text-left px-5 py-3 font-medium text-zinc-500 text-sm">Feedback</th>
+              <th className="text-left px-5 py-3 font-medium text-zinc-500 text-sm whitespace-nowrap">Facebook Status</th>
+              <th className="text-left px-5 py-3 font-medium text-zinc-500 text-sm">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-zinc-800">
             {filtered.map((draft) => {
               const approval = APPROVAL_BADGE[draft.status] ?? APPROVAL_BADGE.pending;
               const isPosted = draft.status === "posted";
 
               return (
-                <tr key={draft.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={draft.id} className="hover:bg-zinc-800/50 transition-colors">
                   <td className="px-5 py-3">
                     {draft.image_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={draft.image_url} alt="post" className="h-10 w-10 rounded-lg object-cover border border-gray-200" />
+                      <img src={draft.image_url} alt="post" className="h-10 w-10 rounded-lg object-cover border border-zinc-700" />
                     ) : (
-                      <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-300 text-sm">
+                      <div className="h-10 w-10 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-600 text-[10px]">
                         No img
                       </div>
                     )}
                   </td>
                   <td className="px-5 py-3 max-w-xs">
-                    <p className="text-gray-700 truncate">{draft.caption || "-"}</p>
+                    <p className="text-zinc-400 truncate">{draft.caption || "-"}</p>
                   </td>
                   <td className="px-5 py-3">
                     <span className={`text-sm font-medium px-2.5 py-1 rounded-full border ${approval.className}`}>
                       {approval.label}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-gray-500 whitespace-nowrap">{formatDateTime(draft.sent_at)}</td>
-                  <td className="px-5 py-3 text-gray-400">-</td>
-                  <td className="px-5 py-3 text-gray-400">-</td>
+                  <td className="px-5 py-3 text-zinc-500 whitespace-nowrap">{formatDateTime(draft.sent_at)}</td>
+                  <td className="px-5 py-3 text-zinc-600">-</td>
+                  <td className="px-5 py-3 text-zinc-600">-</td>
                   <td className="px-5 py-3">
                     {isPosted ? (
-                      <span className="text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full">
+                      <span className="text-sm font-medium text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 rounded-full">
                         Posted
                       </span>
                     ) : (
-                      <span className="text-sm font-medium text-gray-500 bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-full">
+                      <span className="text-sm font-medium text-zinc-500 bg-zinc-800 border border-zinc-700 px-2.5 py-1 rounded-full">
                         Not Posted
                       </span>
                     )}
@@ -208,7 +208,7 @@ export default async function ClientDetailPage({
                   <td className="px-5 py-3">
                     <Link
                       href={`/admin/${userId}/posts/${draft.id}`}
-                      className="text-sm font-medium text-green-600 hover:text-green-800 transition-colors"
+                      className="text-sm font-medium text-violet-400 hover:text-violet-300 transition-colors"
                     >
                       View
                     </Link>
@@ -218,7 +218,7 @@ export default async function ClientDetailPage({
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-5 py-12 text-center text-[15px] text-gray-400">
+                <td colSpan={8} className="px-5 py-12 text-center text-[15px] text-zinc-600">
                   ไม่มีโพสต์ในหมวดนี้
                 </td>
               </tr>

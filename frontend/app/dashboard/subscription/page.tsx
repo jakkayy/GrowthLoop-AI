@@ -37,18 +37,18 @@ export default async function SubscriptionPage() {
   const currentPlan = (user.plan ?? "free") as "free" | "pro" | "enterprise";
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-zinc-950">
       <UserSidebar activePage="subscription" logoutAction={logout} />
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-14 bg-white border-b border-gray-200 flex items-center px-6 shrink-0">
-          <h1 className="text-base font-semibold text-gray-900">Subscription</h1>
+        <header className="h-14 bg-zinc-950 border-b border-zinc-800 flex items-center px-6 shrink-0">
+          <h1 className="text-base font-semibold text-zinc-200">Subscription</h1>
         </header>
 
         <main className="flex-1 p-6 overflow-y-auto">
           <div className="mb-6">
-            <p className="text-[15px] text-gray-500">เลือกแผนที่เหมาะกับธุรกิจของคุณ</p>
+            <p className="text-[15px] text-zinc-500">เลือกแผนที่เหมาะกับธุรกิจของคุณ</p>
           </div>
           <PlanSelector currentPlan={currentPlan} />
         </main>
@@ -56,4 +56,3 @@ export default async function SubscriptionPage() {
     </div>
   );
 }
-

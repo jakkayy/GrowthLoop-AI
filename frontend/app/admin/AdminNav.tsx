@@ -42,8 +42,8 @@ export default function AdminNav() {
             href={href}
             className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-colors ${
               active
-                ? "bg-green-50 border border-green-200 text-green-700"
-                : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                ? "bg-violet-500/10 border border-violet-500/20 text-violet-400"
+                : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
             }`}
           >
             {icon}

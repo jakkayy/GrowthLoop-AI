@@ -17,19 +17,23 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { generate_time, post_time } = (await req.json()) as {
+    const { generate_time, post_time, report_time } = (await req.json()) as {
       generate_time?: string;
       post_time?: string;
+      report_time?: string;
     };
 
     const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
-    if (!generate_time || !post_time || !timeRegex.test(generate_time) || !timeRegex.test(post_time)) {
+    if (
+      !generate_time || !post_time || !report_time ||
+      !timeRegex.test(generate_time) || !timeRegex.test(post_time) || !timeRegex.test(report_time)
+    ) {
       return NextResponse.json({ message: "รูปแบบเวลาไม่ถูกต้อง" }, { status: 400 });
     }
 
     const { error } = await supabase
       .from("users")
-      .update({ generate_time, post_time })
+      .update({ generate_time, post_time, report_time })
       .eq("user_id", userId);
 
     if (error) return NextResponse.json({ message: error.message }, { status: 500 });

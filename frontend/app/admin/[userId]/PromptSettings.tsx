@@ -47,10 +47,10 @@ export default function PromptSettings({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6">
+    <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6">
       <div className="mb-5">
-        <h2 className="text-base font-semibold text-gray-900">Prompt Settings</h2>
-        <p className="text-[15px] text-gray-500 mt-0.5">
+        <h2 className="text-base font-semibold text-zinc-50">Prompt Settings</h2>
+        <p className="text-[15px] text-zinc-500 mt-0.5">
           ปล่อยว่างเพื่อใช้ default prompt ของระบบ
         </p>
       </div>
@@ -58,10 +58,10 @@ export default function PromptSettings({
       <div className="space-y-5">
         {/* Caption system prompt */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label className="block text-sm font-medium text-zinc-300 mb-1.5">
             Caption System Prompt
           </label>
-          <p className="text-[15px] text-gray-400 mb-2">
+          <p className="text-[15px] text-zinc-500 mb-2">
             กำหนดบุคลิกและสไตล์การเขียนแคปชั่นของ AI สำหรับร้านนี้
           </p>
           <textarea
@@ -69,28 +69,28 @@ export default function PromptSettings({
             onChange={(e) => setCaptionPrompt(e.target.value)}
             rows={4}
             placeholder="ปล่อยว่าง = ใช้ default prompt"
-            className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-y font-mono"
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-y font-mono"
           />
         </div>
 
         {/* Image prompt prefix */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label className="block text-sm font-medium text-zinc-300 mb-1.5">
             Image Prompt Prefix
           </label>
-          <p className="text-[15px] text-gray-400 mb-2">
+          <p className="text-[15px] text-zinc-500 mb-2">
             ประโยคนำก่อนแคปชั่นในการสร้างรูป เช่น{" "}
-            <span className="font-mono bg-gray-100 px-1 rounded">
+            <span className="font-mono bg-zinc-800 text-zinc-300 px-1.5 rounded">
               Create a minimalist product photo for
             </span>
-            {" "}(ค่า default: <span className="font-mono bg-gray-100 px-1 rounded">Create a clean social media promotional image for</span>)
+            {" "}(ค่า default: <span className="font-mono bg-zinc-800 text-zinc-300 px-1.5 rounded">Create a clean social media promotional image for</span>)
           </p>
           <textarea
             value={imagePrefix}
             onChange={(e) => setImagePrefix(e.target.value)}
             rows={4}
             placeholder="ปล่อยว่าง = ใช้ default prefix"
-            className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-y font-mono"
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-y font-mono"
           />
         </div>
       </div>
@@ -99,15 +99,15 @@ export default function PromptSettings({
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-4 py-2 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {saving ? "Saving..." : "Save Prompts"}
         </button>
         {saved && (
-          <span className="text-sm text-green-600 font-medium">Saved</span>
+          <span className="text-sm text-emerald-400 font-medium">Saved</span>
         )}
         {error && (
-          <span className="text-sm text-red-500">{error}</span>
+          <span className="text-sm text-red-400">{error}</span>
         )}
       </div>
     </div>

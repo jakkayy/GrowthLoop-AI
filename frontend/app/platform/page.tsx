@@ -44,12 +44,12 @@ async function getPostDrafts(userId: string): Promise<PostDraft[]> {
 }
 
 const STATUS_CONFIG: Record<PostDraft["status"], { label: string; className: string }> = {
-  pending:  { label: "รอดำเนินการ", className: "bg-gray-50 text-gray-500 border border-gray-200" },
-  sent:     { label: "ส่งแล้ว",     className: "bg-blue-50 text-blue-600 border border-blue-200" },
-  approved: { label: "อนุมัติแล้ว", className: "bg-green-50 text-green-700 border border-green-200" },
-  denied:   { label: "ปฏิเสธ",      className: "bg-red-50 text-red-600 border border-red-200" },
-  expired:  { label: "หมดเวลา",     className: "bg-orange-50 text-orange-600 border border-orange-200" },
-  posted:   { label: "โพสต์แล้ว",   className: "bg-green-50 text-green-700 border border-green-200" },
+  pending:  { label: "รอดำเนินการ", className: "bg-zinc-800 text-zinc-400 border border-zinc-700" },
+  sent:     { label: "ส่งแล้ว",     className: "bg-blue-500/10 text-blue-400 border border-blue-500/20" },
+  approved: { label: "อนุมัติแล้ว", className: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" },
+  denied:   { label: "ปฏิเสธ",      className: "bg-red-500/10 text-red-400 border border-red-500/20" },
+  expired:  { label: "หมดเวลา",     className: "bg-amber-500/10 text-amber-400 border border-amber-500/20" },
+  posted:   { label: "โพสต์แล้ว",   className: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" },
 };
 
 function StatusBadge({ status }: { status: PostDraft["status"] }) {
@@ -69,9 +69,9 @@ function formatDate(dateStr: string) {
 
 function PostCard({ draft }: { draft: PostDraft }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 flex flex-col gap-2 hover:border-green-300 transition-colors">
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 flex flex-col gap-2 hover:border-zinc-700 transition-colors">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm text-gray-600 leading-relaxed line-clamp-3 flex-1">
+        <p className="text-sm text-zinc-400 leading-relaxed line-clamp-3 flex-1">
           {draft.caption || "ไม่มีเนื้อหา"}
         </p>
         {draft.image_url && (
@@ -79,13 +79,13 @@ function PostCard({ draft }: { draft: PostDraft }) {
           <img
             src={draft.image_url}
             alt="post"
-            className="h-12 w-12 rounded-lg object-cover border border-gray-200 shrink-0"
+            className="h-12 w-12 rounded-lg object-cover border border-zinc-700 shrink-0"
           />
         )}
       </div>
-      <div className="flex items-center justify-between pt-1 border-t border-gray-100">
+      <div className="flex items-center justify-between pt-1 border-t border-zinc-800">
         <StatusBadge status={draft.status} />
-        <span className="text-[15px] text-gray-400">{formatDate(draft.sent_at ?? draft.created_at)}</span>
+        <span className="text-[13px] text-zinc-600">{formatDate(draft.sent_at ?? draft.created_at)}</span>
       </div>
     </div>
   );
@@ -94,8 +94,8 @@ function PostCard({ draft }: { draft: PostDraft }) {
 function EmptyState({ text }: { text: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="h-12 w-12 rounded-2xl bg-gray-100 flex items-center justify-center mb-3 text-xl">📭</div>
-      <p className="text-[15px] text-gray-500">{text}</p>
+      <div className="h-12 w-12 rounded-2xl bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-3 text-xl">📭</div>
+      <p className="text-[15px] text-zinc-500">{text}</p>
     </div>
   );
 }
@@ -108,16 +108,16 @@ export default async function PlatformPage() {
   const facebookDrafts = allDrafts.filter((d) => d.status === "posted");
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-zinc-950">
       <UserSidebar activePage="platform" logoutAction={logout} />
 
       {/* ── Main ── */}
       <div className="flex-1 flex flex-col min-w-0">
 
         {/* Top bar */}
-        <header className="h-14 bg-white border-b border-gray-200 flex items-center px-6 gap-4 shrink-0">
+        <header className="h-14 bg-zinc-950 border-b border-zinc-800 flex items-center px-6 gap-4 shrink-0">
           <div className="flex-1">
-            <h1 className="text-base font-semibold text-gray-900">Connect Platform</h1>
+            <h1 className="text-base font-semibold text-zinc-200">Connect Platform</h1>
           </div>
         </header>
 
@@ -125,9 +125,9 @@ export default async function PlatformPage() {
         <main className="flex-1 p-6 space-y-5 overflow-y-auto">
 
           {/* Connect Buttons */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-1">เชื่อมต่อแพลตฟอร์ม</h2>
-            <p className="text-[15px] text-gray-500 mb-5">เลือกแพลตฟอร์มที่ต้องการเชื่อมต่อกับระบบ</p>
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+            <h2 className="text-lg font-bold text-zinc-50 mb-1">เชื่อมต่อแพลตฟอร์ม</h2>
+            <p className="text-[15px] text-zinc-500 mb-5">เลือกแพลตฟอร์มที่ต้องการเชื่อมต่อกับระบบ</p>
             <div className="flex gap-3">
               <a
                 href="/api/line/login"
@@ -148,14 +148,14 @@ export default async function PlatformPage() {
           <div className="grid grid-cols-2 gap-5">
 
             {/* LINE History */}
-            <div className="rounded-2xl border border-gray-200 bg-white flex flex-col">
-              <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-                <div className="h-8 w-8 rounded-xl bg-[#06C755]/20 flex items-center justify-center text-[#06C755] text-sm font-bold border border-[#06C755]/20">L</div>
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 flex flex-col">
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-800">
+                <div className="h-8 w-8 rounded-xl bg-[#06C755]/15 flex items-center justify-center text-[#06C755] text-sm font-bold border border-[#06C755]/20">L</div>
                 <div>
-                  <h2 className="text-base font-semibold text-gray-900">LINE</h2>
-                  <p className="text-[15px] text-gray-500">ประวัติการส่งและอนุมัติ</p>
+                  <h2 className="text-base font-semibold text-zinc-50">LINE</h2>
+                  <p className="text-[13px] text-zinc-500">ประวัติการส่งและอนุมัติ</p>
                 </div>
-                <span className="ml-auto text-sm font-medium bg-gray-50 text-gray-600 border border-gray-200 px-2.5 py-1 rounded-full">
+                <span className="ml-auto text-sm font-medium bg-zinc-800 text-zinc-400 border border-zinc-700 px-2.5 py-1 rounded-full">
                   {lineDrafts.length} รายการ
                 </span>
               </div>
@@ -169,14 +169,14 @@ export default async function PlatformPage() {
             </div>
 
             {/* Facebook History */}
-            <div className="rounded-2xl border border-gray-200 bg-white flex flex-col">
-              <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-                <div className="h-8 w-8 rounded-xl bg-[#1877F2]/20 flex items-center justify-center text-[#4a9eff] text-sm font-bold border border-[#1877F2]/20">f</div>
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 flex flex-col">
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-800">
+                <div className="h-8 w-8 rounded-xl bg-[#1877F2]/15 flex items-center justify-center text-[#4a9eff] text-sm font-bold border border-[#1877F2]/20">f</div>
                 <div>
-                  <h2 className="text-base font-semibold text-gray-900">Facebook</h2>
-                  <p className="text-[15px] text-gray-500">โพสต์ที่เผยแพร่แล้ว</p>
+                  <h2 className="text-base font-semibold text-zinc-50">Facebook</h2>
+                  <p className="text-[13px] text-zinc-500">โพสต์ที่เผยแพร่แล้ว</p>
                 </div>
-                <span className="ml-auto text-sm font-medium bg-gray-50 text-gray-600 border border-gray-200 px-2.5 py-1 rounded-full">
+                <span className="ml-auto text-sm font-medium bg-zinc-800 text-zinc-400 border border-zinc-700 px-2.5 py-1 rounded-full">
                   {facebookDrafts.length} รายการ
                 </span>
               </div>
@@ -195,4 +195,3 @@ export default async function PlatformPage() {
     </div>
   );
 }
-

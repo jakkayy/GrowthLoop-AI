@@ -80,36 +80,29 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // 3) เช็คว่า LINE account นี้ถูก connect กับ user อื่นอยู่หรือเปล่า
-  const { data: existing } = await supabase
+  // 3) ลบ connections เก่าทั้งหมด (ทั้งของ user นี้ และ LINE account นี้ที่อาจอยู่กับ user อื่น)
+  await supabase
     .from("line_connections")
-    .select("user_id")
-    .eq("line_user_id", profile.userId)
-    .single();
+    .delete()
+    .eq("user_id", userId);
 
-  if (existing && existing.user_id !== userId) {
-    // LINE account นี้ถูกใช้กับ user อื่นแล้ว — ย้าย ownership มาให้ user ปัจจุบัน
-    await supabase
-      .from("line_connections")
-      .delete()
-      .eq("line_user_id", profile.userId);
-  }
+  await supabase
+    .from("line_connections")
+    .delete()
+    .eq("line_user_id", profile.userId);
 
-  // upsert line_connections
+  // insert connection ใหม่เพียงอันเดียว
   const { error: upsertError } = await supabase
     .from("line_connections")
-    .upsert(
-      {
-        user_id: userId,
-        line_user_id: profile.userId,
-        display_name: profile.displayName,
-        picture_url: profile.pictureUrl ?? null,
-        access_token: lineAccessToken,
-        status: "active",
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "user_id" }
-    );
+    .insert({
+      user_id: userId,
+      line_user_id: profile.userId,
+      display_name: profile.displayName,
+      picture_url: profile.pictureUrl ?? null,
+      access_token: lineAccessToken,
+      status: "active",
+      updated_at: new Date().toISOString(),
+    });
 
   if (upsertError) {
     return NextResponse.json(

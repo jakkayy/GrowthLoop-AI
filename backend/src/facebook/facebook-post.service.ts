@@ -62,7 +62,7 @@ export class FacebookPostService {
     userId: string;
     caption: string;
     imageUrl: string;
-  }): Promise<void> {
+  }): Promise<string | null> {
     const { data: pages, error } = await this.supabase
       .from('facebook_pages')
       .select('page_id, page_name, page_access_token')
@@ -72,12 +72,14 @@ export class FacebookPostService {
     if (error) throw new Error(error.message);
     if (!pages || pages.length === 0) {
       this.logger.warn(`No active Facebook pages for user ${input.userId}`);
-      return;
+      return null;
     }
+
+    let firstPostId: string | null = null;
 
     for (const page of pages) {
       try {
-        await axios.post(
+        const { data: res } = await axios.post(
           `https://graph.facebook.com/${this.apiVersion}/${page.page_id}/photos`,
           {
             url: input.imageUrl,
@@ -86,11 +88,16 @@ export class FacebookPostService {
           },
         );
         this.logger.log(`Posted to Facebook page "${page.page_name}"`);
+        if (!firstPostId) {
+          firstPostId = (res?.post_id ?? `${page.page_id}_${res?.id}`) as string;
+        }
       } catch (err: any) {
         this.logger.error(
           `Failed to post to page "${page.page_name}": ${err?.response?.data?.error?.message ?? err.message}`,
         );
       }
     }
+
+    return firstPostId;
   }
 }
