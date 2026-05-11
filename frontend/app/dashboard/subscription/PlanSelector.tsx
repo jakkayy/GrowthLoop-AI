@@ -93,17 +93,17 @@ export default function PlanSelector({ currentPlan }: { currentPlan: Plan }) {
               onClick={() => { setSelected(plan.id); setSuccess(false); }}
               className={`text-left rounded-2xl border-2 p-5 transition-all ${
                 isActive
-                  ? "border-green-500 bg-green-50"
-                  : "border-gray-200 bg-white hover:border-gray-300"
+                  ? "border-violet-500 bg-violet-500/8"
+                  : "border-zinc-800 bg-zinc-900 hover:border-zinc-700"
               }`}
             >
               <div className="flex items-start justify-between mb-3">
                 <div>
-                  <p className="text-base font-bold text-gray-900">{plan.name}</p>
-                  <p className="text-[15px] text-gray-500 mt-0.5">{plan.description}</p>
+                  <p className="text-base font-bold text-zinc-50">{plan.name}</p>
+                  <p className="text-[15px] text-zinc-500 mt-0.5">{plan.description}</p>
                 </div>
                 <div className={`mt-0.5 h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                  isActive ? "border-green-500 bg-green-500" : "border-gray-300"
+                  isActive ? "border-violet-500 bg-violet-500" : "border-zinc-700"
                 }`}>
                   {isActive && (
                     <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -113,14 +113,14 @@ export default function PlanSelector({ currentPlan }: { currentPlan: Plan }) {
                 </div>
               </div>
 
-              <p className={`text-lg font-bold mb-4 ${isActive ? "text-green-600" : "text-gray-900"}`}>
+              <p className={`text-lg font-bold mb-4 ${isActive ? "text-violet-400" : "text-zinc-300"}`}>
                 {plan.price}
               </p>
 
               <ul className="space-y-1.5">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
-                    <svg className="w-4 h-4 text-green-500 shrink-0 mt-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <li key={f} className="flex items-start gap-2 text-sm text-zinc-400">
+                    <svg className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M3 8l3 3 7-7" />
                     </svg>
                     {f}
@@ -129,7 +129,7 @@ export default function PlanSelector({ currentPlan }: { currentPlan: Plan }) {
               </ul>
 
               {isCurrent && (
-                <div className="mt-4 text-sm text-green-600 font-medium bg-green-100 rounded-full px-3 py-1 inline-block">
+                <div className="mt-4 text-sm text-violet-400 font-medium bg-violet-500/10 border border-violet-500/20 rounded-full px-3 py-1 inline-block">
                   แผนปัจจุบัน
                 </div>
               )}
@@ -143,15 +143,15 @@ export default function PlanSelector({ currentPlan }: { currentPlan: Plan }) {
         <button
           onClick={handleConfirm}
           disabled={!isChanged || loading}
-          className="px-6 py-2.5 rounded-xl bg-green-600 text-white text-sm font-medium hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-medium hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? "กำลังบันทึก..." : "ยืนยันแผน"}
         </button>
         {success && (
-          <p className="text-sm text-green-600 font-medium">เปลี่ยนแผนสำเร็จแล้ว</p>
+          <p className="text-sm text-emerald-400 font-medium">เปลี่ยนแผนสำเร็จแล้ว</p>
         )}
         {!isChanged && !success && (
-          <p className="text-[15px] text-gray-400">เลือกแผนอื่นเพื่อเปลี่ยน</p>
+          <p className="text-[15px] text-zinc-600">เลือกแผนอื่นเพื่อเปลี่ยน</p>
         )}
       </div>
     </div>

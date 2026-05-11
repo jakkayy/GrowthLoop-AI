@@ -34,15 +34,15 @@ export default function UserSidebar({ activePage, logoutAction }: UserSidebarPro
   ];
 
   return (
-    <aside className="w-56 shrink-0 bg-white flex flex-col border-r border-gray-200">
-      <div className="px-5 pt-6 pb-5 border-b border-gray-100">
+    <aside className="w-56 shrink-0 bg-zinc-950 flex flex-col border-r border-zinc-800">
+      <div className="px-5 pt-6 pb-5 border-b border-zinc-800">
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg bg-green-600 flex items-center justify-center">
-            <span className="text-white text-sm font-bold">A</span>
+          <div className="h-8 w-8 rounded-lg bg-violet-600 flex items-center justify-center">
+            <span className="text-white text-sm font-bold">G</span>
           </div>
           <div>
-            <p className="text-gray-900 text-sm font-bold leading-tight">AXIS</p>
-            <p className="text-sm text-green-600/70 tracking-widest">AI MARKETING</p>
+            <p className="text-zinc-50 text-sm font-bold leading-tight">Growthloop</p>
+            <p className="text-[10px] text-violet-400/70 tracking-widest">AI MARKETING</p>
           </div>
         </div>
       </div>
@@ -56,8 +56,8 @@ export default function UserSidebar({ activePage, logoutAction }: UserSidebarPro
               href={item.href}
               className={
                 isActive
-                  ? "flex items-center gap-3 px-3 py-2.5 rounded-xl bg-green-50 border border-green-200 text-green-700"
-                  : "flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors"
+                  ? "flex items-center gap-3 px-3 py-2.5 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400"
+                  : "flex items-center gap-3 px-3 py-2.5 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
               }
             >
               <span className="w-4 h-4 shrink-0">{item.icon}</span>
@@ -67,11 +67,11 @@ export default function UserSidebar({ activePage, logoutAction }: UserSidebarPro
         })}
       </nav>
 
-      <div className="px-3 pb-5 border-t border-gray-100 pt-4">
+      <div className="px-3 pb-5 border-t border-zinc-800 pt-4">
         <form action={logoutAction}>
           <button
             type="submit"
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
           >
             <span className="w-4 h-4 shrink-0"><LogoutIcon /></span>
             <span className="text-sm">Log Out</span>

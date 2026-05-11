@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const INPUT = "w-full rounded-xl bg-white border border-gray-200 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition";
-const LABEL = "mb-1.5 block text-sm font-medium text-gray-700";
+const INPUT = "w-full rounded-xl bg-zinc-800 border border-zinc-700 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500 transition";
+const LABEL = "mb-1.5 block text-sm font-medium text-zinc-300";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -61,36 +61,36 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center p-6 relative overflow-hidden">
+    <main className="min-h-screen bg-zinc-950 flex items-center justify-center p-6 relative overflow-hidden">
       {/* Back button */}
       <div className="absolute top-5 left-6 z-20">
-        <Link href="/" className="inline-flex items-center gap-1.5 text-[15px] text-gray-500 hover:text-green-600 transition-colors">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-[15px] text-zinc-500 hover:text-zinc-200 transition-colors">
           ← กลับหน้าหลัก
         </Link>
       </div>
 
       {/* Glow */}
-      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-[300px] w-[600px] rounded-full bg-green-200/50 blur-[120px]" />
+      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-[300px] w-[600px] rounded-full bg-violet-600/6 blur-[120px]" />
 
       <div className="relative z-10 w-full max-w-2xl py-8">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="h-8 w-8 rounded-lg bg-green-600 flex items-center justify-center">
-            <span className="text-white text-sm font-bold">A</span>
+          <div className="h-8 w-8 rounded-lg bg-violet-600 flex items-center justify-center">
+            <span className="text-white text-sm font-bold">G</span>
           </div>
-          <span className="text-lg font-bold text-gray-900">AXIS</span>
+          <span className="text-lg font-bold text-zinc-50">Growthloop AI</span>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-          <h1 className="mb-1 text-2xl font-bold text-gray-900">สมัครสมาชิก</h1>
-          <p className="mb-8 text-[15px] text-gray-500">กรอกข้อมูลบัญชีและข้อมูลแบรนด์ของคุณ</p>
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-8">
+          <h1 className="mb-1 text-2xl font-bold text-zinc-50">สมัครสมาชิก</h1>
+          <p className="mb-8 text-[15px] text-zinc-500">กรอกข้อมูลบัญชีและข้อมูลแบรนด์ของคุณ</p>
 
           <form onSubmit={handleRegister} className="space-y-8">
             {/* Account Section */}
             <div>
               <div className="flex items-center gap-3 mb-5">
-                <div className="h-6 w-6 rounded-full bg-green-600 flex items-center justify-center text-white text-sm font-bold">1</div>
-                <h2 className="text-base font-semibold text-gray-900">ข้อมูลบัญชี</h2>
+                <div className="h-6 w-6 rounded-full bg-violet-600 flex items-center justify-center text-white text-sm font-bold">1</div>
+                <h2 className="text-base font-semibold text-zinc-50">ข้อมูลบัญชี</h2>
               </div>
               <div className="space-y-4">
                 <div>
@@ -110,13 +110,13 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div className="border-t border-gray-100" />
+            <div className="border-t border-zinc-800" />
 
             {/* Brand Section */}
             <div>
               <div className="flex items-center gap-3 mb-5">
-                <div className="h-6 w-6 rounded-full bg-green-600 flex items-center justify-center text-white text-sm font-bold">2</div>
-                <h2 className="text-base font-semibold text-gray-900">ข้อมูลแบรนด์</h2>
+                <div className="h-6 w-6 rounded-full bg-violet-600 flex items-center justify-center text-white text-sm font-bold">2</div>
+                <h2 className="text-base font-semibold text-zinc-50">ข้อมูลแบรนด์</h2>
               </div>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -171,7 +171,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">เป้าหมายทางการตลาด</label>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">เป้าหมายทางการตลาด</label>
                   <div className="flex gap-2">
                     {marketingGoalOptions.map((goal) => (
                       <button
@@ -180,8 +180,8 @@ export default function RegisterPage() {
                         onClick={() => setMarketingGoal(goal)}
                         className={`rounded-full px-5 py-2 text-sm font-medium transition-colors border ${
                           marketingGoal === goal
-                            ? "bg-green-600 text-white border-green-600"
-                            : "bg-white text-gray-500 border-gray-200 hover:border-green-400 hover:text-green-600"
+                            ? "bg-violet-600 text-white border-violet-600"
+                            : "bg-zinc-800 text-zinc-400 border-zinc-700 hover:border-violet-500/50 hover:text-violet-400"
                         }`}
                       >
                         {goal}
@@ -193,30 +193,30 @@ export default function RegisterPage() {
             </div>
 
             {errorMessage && (
-              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3">
-                <p className="text-sm text-red-600">{errorMessage}</p>
+              <div className="rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3">
+                <p className="text-sm text-red-400">{errorMessage}</p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-green-600 text-white px-4 py-3 font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+              className="w-full rounded-xl bg-violet-600 text-white px-4 py-3 font-medium hover:bg-violet-500 disabled:opacity-50 transition-colors"
             >
               {loading ? "กำลังสมัครสมาชิก..." : "สมัครสมาชิก"}
             </button>
           </form>
 
-          <p className="mt-5 text-center text-[15px] text-gray-500">
+          <p className="mt-5 text-center text-[15px] text-zinc-500">
             มีบัญชีแล้ว?{" "}
-            <Link href="/login" className="font-semibold text-green-600 hover:text-green-700">
+            <Link href="/login" className="font-semibold text-violet-400 hover:text-violet-300">
               เข้าสู่ระบบ
             </Link>
           </p>
         </div>
 
-        <p className="mt-6 text-center text-[15px] text-gray-400">
-          © 2026 AXIS. All rights reserved.
+        <p className="mt-6 text-center text-[13px] text-zinc-600">
+          © 2026 Growthloop AI. All rights reserved.
         </p>
       </div>
     </main>

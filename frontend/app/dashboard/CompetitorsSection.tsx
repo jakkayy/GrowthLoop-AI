@@ -132,22 +132,22 @@ export default function CompetitorsSection() {
 
   const jobBadge = (job: ScrapeJob | null) => {
     if (!job)
-      return <span className="text-sm text-gray-400">ยังไม่เคย scrape</span>;
+      return <span className="text-sm text-zinc-500">ยังไม่เคย scrape</span>;
     if (job.status === "running")
       return (
-        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-yellow-600 bg-yellow-50 border border-yellow-200 px-2.5 py-0.5 rounded-full">
-          <span className="h-1.5 w-1.5 rounded-full bg-yellow-500 animate-pulse" />
+        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-full">
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
           กำลัง scrape...
         </span>
       );
     if (job.status === "failed")
       return (
-        <span className="text-sm font-medium text-red-600 bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full">
+        <span className="text-sm font-medium text-red-400 bg-red-500/10 border border-red-500/20 px-2.5 py-0.5 rounded-full">
           ล้มเหลว
         </span>
       );
     return (
-      <span className="text-sm font-medium text-green-700 bg-green-50 border border-green-100 px-2.5 py-0.5 rounded-full">
+      <span className="text-sm font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
         สำเร็จ · {job.posts_count ?? 0} โพสต์
       </span>
     );
@@ -165,21 +165,21 @@ export default function CompetitorsSection() {
     : null;
 
   return (
-    <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
+    <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6">
       <div className="flex items-start justify-between mb-1">
         <div>
-          <span className="text-sm font-bold text-purple-700 bg-purple-50 border border-purple-100 px-2.5 py-1 rounded-full tracking-wide">
+          <span className="text-xs font-bold text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2.5 py-1 rounded-full tracking-wide uppercase">
             COMPETITOR ANALYSIS
           </span>
-          <h2 className="text-base font-semibold text-gray-900 mt-2">วิเคราะห์คู่แข่ง (Facebook Competitor)</h2>
-          <p className="text-[15px] text-gray-400 mt-0.5">
+          <h2 className="text-base font-semibold text-zinc-50 mt-2">วิเคราะห์คู่แข่ง (Facebook Competitor)</h2>
+          <p className="text-[15px] text-zinc-500 mt-0.5">
             เพิ่มลิงก์เพจ Facebook คู่แข่ง · ดึงโพสต์และคอมเม้นต์ 7 วันล่าสุด · AI วิเคราะห์อัตโนมัติทุกสัปดาห์
           </p>
         </div>
         <button
           onClick={handleAnalyze}
           disabled={analyzing}
-          className="shrink-0 rounded-xl bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50 transition-colors"
+          className="shrink-0 rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-500 disabled:opacity-50 transition-colors"
         >
           {analyzing ? "กำลังวิเคราะห์..." : "วิเคราะห์ตอนนี้"}
         </button>
@@ -188,13 +188,13 @@ export default function CompetitorsSection() {
       {/* Insights result */}
       <div className="mb-5 mt-4">
         {analyzeError && (
-          <div className="mb-3 rounded-xl bg-red-50 border border-red-100 px-4 py-3">
-            <p className="text-sm text-red-600">{analyzeError}</p>
+          <div className="mb-3 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3">
+            <p className="text-sm text-red-400">{analyzeError}</p>
           </div>
         )}
         {insightsLoading ? (
           <div className="flex items-center justify-center py-6">
-            <div className="h-5 w-5 rounded-full border-2 border-purple-600 border-t-transparent animate-spin" />
+            <div className="h-5 w-5 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
           </div>
         ) : insightLines.length > 0 ? (
           <>
@@ -205,69 +205,69 @@ export default function CompetitorsSection() {
                 const title = hasColon ? line.substring(0, colonIdx).trim() : line;
                 const desc = hasColon ? line.substring(colonIdx + 1).trim() : "";
                 return (
-                  <div key={i} className="flex gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-purple-100 hover:bg-purple-50/30 transition-colors">
-                    <span className="text-sm font-bold text-purple-500 shrink-0 mt-0.5 w-5">
+                  <div key={i} className="flex gap-3 p-3 rounded-xl bg-zinc-800 border border-zinc-700 hover:border-violet-500/30 transition-colors">
+                    <span className="text-sm font-bold text-violet-400 shrink-0 mt-0.5 w-5">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <div className="min-w-0">
-                      <p className="text-[15px] font-semibold text-gray-800 leading-snug">{title}</p>
-                      {desc && <p className="text-sm text-gray-400 mt-0.5 leading-relaxed">{desc}</p>}
+                      <p className="text-[15px] font-semibold text-zinc-200 leading-snug">{title}</p>
+                      {desc && <p className="text-sm text-zinc-500 mt-0.5 leading-relaxed">{desc}</p>}
                     </div>
                   </div>
                 );
               })}
             </div>
             {formattedDate && (
-              <p className="mt-3 text-sm text-gray-400">วิเคราะห์ล่าสุด: {formattedDate}</p>
+              <p className="mt-3 text-sm text-zinc-600">วิเคราะห์ล่าสุด: {formattedDate}</p>
             )}
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center py-6 text-center rounded-xl bg-gray-50 border border-gray-100">
+          <div className="flex flex-col items-center justify-center py-6 text-center rounded-xl bg-zinc-800 border border-zinc-700">
             <span className="text-2xl mb-2">🔍</span>
-            <p className="text-[15px] font-medium text-gray-500">ยังไม่มีข้อมูลวิเคราะห์</p>
-            <p className="text-sm text-gray-400 mt-1">Scrape คู่แข่งก่อน แล้วกด "วิเคราะห์ตอนนี้"</p>
+            <p className="text-[15px] font-medium text-zinc-500">ยังไม่มีข้อมูลวิเคราะห์</p>
+            <p className="text-sm text-zinc-600 mt-1">Scrape คู่แข่งก่อน แล้วกด "วิเคราะห์ตอนนี้"</p>
           </div>
         )}
       </div>
 
-      <div className="border-t border-gray-100 pt-5">
-        <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">รายการคู่แข่ง</p>
+      <div className="border-t border-zinc-800 pt-5">
+        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-4">รายการคู่แข่ง</p>
 
         {/* Add form */}
-        <div className="mb-5 rounded-xl bg-gray-50 border border-gray-100 p-4 space-y-3">
-          <p className="text-sm font-medium text-gray-500">เพิ่มคู่แข่งใหม่</p>
+        <div className="mb-5 rounded-xl bg-zinc-800 border border-zinc-700 p-4 space-y-3">
+          <p className="text-sm font-medium text-zinc-400">เพิ่มคู่แข่งใหม่</p>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-500">ชื่อเพจ</label>
+              <label className="text-sm text-zinc-500">ชื่อเพจ</label>
               <input
                 type="text"
                 placeholder="เช่น ร้านกาแฟ ABC"
                 value={pageName}
                 onChange={(e) => setPageName(e.target.value)}
-                className="rounded-xl bg-white border border-gray-200 px-3 py-2 text-[15px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition"
+                className="rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-2 text-[15px] text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500 transition"
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-500">Facebook Page URL</label>
+              <label className="text-sm text-zinc-500">Facebook Page URL</label>
               <input
                 type="url"
                 placeholder="https://www.facebook.com/pagename"
                 value={pageUrl}
                 onChange={(e) => setPageUrl(e.target.value)}
-                className="rounded-xl bg-white border border-gray-200 px-3 py-2 text-[15px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition"
+                className="rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-2 text-[15px] text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500 transition"
               />
             </div>
           </div>
           <div className="flex items-center justify-between">
             {addError ? (
-              <p className="text-sm text-red-500">{addError}</p>
+              <p className="text-sm text-red-400">{addError}</p>
             ) : (
               <span />
             )}
             <button
               onClick={handleAdd}
               disabled={addLoading}
-              className="rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+              className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-500 disabled:opacity-50 transition-colors"
             >
               {addLoading ? "กำลังเพิ่ม..." : "+ เพิ่มคู่แข่ง"}
             </button>
@@ -276,26 +276,26 @@ export default function CompetitorsSection() {
 
         {/* Competitor list */}
         {competitors.length === 0 ? (
-          <p className="text-center text-[15px] text-gray-400 py-6">ยังไม่มีคู่แข่ง</p>
+          <p className="text-center text-[15px] text-zinc-600 py-6">ยังไม่มีคู่แข่ง</p>
         ) : (
           <div className="space-y-3">
             {competitors.map((c) => {
               const job = latestJob(c);
               const isScraping = scrapingIds.has(c.id) || job?.status === "running";
               return (
-                <div key={c.id} className="rounded-xl bg-gray-50 border border-gray-100 p-4">
+                <div key={c.id} className="rounded-xl bg-zinc-800 border border-zinc-700 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#1877F2]/15 text-[#4a9eff] text-sm font-bold border border-[#1877F2]/15">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#1877F2]/15 text-[#4a9eff] text-sm font-bold border border-[#1877F2]/20">
                         f
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[15px] font-semibold text-gray-900 truncate">{c.page_name}</p>
+                        <p className="text-[15px] font-semibold text-zinc-200 truncate">{c.page_name}</p>
                         <a
                           href={c.page_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-gray-400 hover:text-green-600 truncate block transition-colors"
+                          className="text-sm text-zinc-500 hover:text-violet-400 truncate block transition-colors"
                         >
                           {c.page_url}
                         </a>
@@ -308,7 +308,7 @@ export default function CompetitorsSection() {
                           href={job.result_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-green-600 hover:border-green-300 transition-colors"
+                          className="rounded-lg border border-zinc-700 px-3 py-1.5 text-sm font-medium text-zinc-400 hover:text-violet-400 hover:border-violet-500/40 transition-colors"
                         >
                           ดูผล
                         </a>
@@ -316,21 +316,21 @@ export default function CompetitorsSection() {
                       <button
                         onClick={() => handleScrape(c)}
                         disabled={isScraping}
-                        className="rounded-lg bg-green-50 border border-green-100 px-3 py-1.5 text-sm font-medium text-green-700 hover:bg-green-100 disabled:opacity-50 transition-colors"
+                        className="rounded-lg bg-violet-500/10 border border-violet-500/20 px-3 py-1.5 text-sm font-medium text-violet-400 hover:bg-violet-500/20 disabled:opacity-50 transition-colors"
                       >
                         {isScraping ? "กำลัง scrape..." : "Scrape Now"}
                       </button>
                       <button
                         onClick={() => handleDelete(c.id)}
                         disabled={isScraping}
-                        className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-red-500 hover:border-red-200 disabled:opacity-40 transition-colors"
+                        className="rounded-lg border border-zinc-700 px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-red-400 hover:border-red-500/30 disabled:opacity-40 transition-colors"
                       >
                         ลบ
                       </button>
                     </div>
                   </div>
                   {job?.status === "completed" && job.completed_at && (
-                    <p className="mt-2 text-sm text-gray-400">
+                    <p className="mt-2 text-sm text-zinc-600">
                       อัปเดตล่าสุด:{" "}
                       {new Date(job.completed_at).toLocaleDateString("th-TH", {
                         year: "numeric", month: "short", day: "numeric",
