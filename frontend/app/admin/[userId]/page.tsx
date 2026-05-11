@@ -1,29 +1,21 @@
 import { createAdminClient } from "@/lib/supabase-admin";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import DraftStatusBadge, { PostStatus } from "@/components/DraftStatusBadge";
+import ReferenceImages from "@/components/ReferenceImages";
 import PromptSettings from "./PromptSettings";
-import ReferenceImages from "./ReferenceImages";
 import TestGenerate from "./TestGenerate";
 
 type Draft = {
   id: string;
   caption: string;
   image_url: string | null;
-  status: "pending" | "sent" | "approved" | "denied" | "expired" | "posted";
+  status: PostStatus;
   sent_at: string | null;
   created_at: string;
 };
 
 type Tab = "all" | "approved" | "denied" | "pending";
-
-const APPROVAL_BADGE: Record<string, { label: string; className: string }> = {
-  approved: { label: "Approved", className: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
-  posted:   { label: "Approved", className: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
-  denied:   { label: "Denied",   className: "text-red-400 bg-red-500/10 border-red-500/20" },
-  pending:  { label: "Pending",  className: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
-  sent:     { label: "Pending",  className: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
-  expired:  { label: "Expired",  className: "text-orange-400 bg-orange-500/10 border-orange-500/20" },
-};
 
 function formatDateTime(iso: string | null) {
   if (!iso) return "-";
@@ -118,9 +110,10 @@ export default async function ClientDetailPage({
       {/* Reference Images */}
       <div className="mb-6">
         <ReferenceImages
-          userId={userId}
+          apiBase={`/api/admin/users/${userId}`}
           initialGroups={productGroups ?? []}
           initialUngrouped={ungroupedImages ?? []}
+          columns={4}
         />
       </div>
 
@@ -168,7 +161,6 @@ export default async function ClientDetailPage({
           </thead>
           <tbody className="divide-y divide-zinc-800">
             {filtered.map((draft) => {
-              const approval = APPROVAL_BADGE[draft.status] ?? APPROVAL_BADGE.pending;
               const isPosted = draft.status === "posted";
 
               return (
@@ -187,9 +179,7 @@ export default async function ClientDetailPage({
                     <p className="text-zinc-400 truncate">{draft.caption || "-"}</p>
                   </td>
                   <td className="px-5 py-3">
-                    <span className={`text-sm font-medium px-2.5 py-1 rounded-full border ${approval.className}`}>
-                      {approval.label}
-                    </span>
+                    <DraftStatusBadge status={draft.status} variant="admin" />
                   </td>
                   <td className="px-5 py-3 text-zinc-500 whitespace-nowrap">{formatDateTime(draft.sent_at)}</td>
                   <td className="px-5 py-3 text-zinc-600">-</td>

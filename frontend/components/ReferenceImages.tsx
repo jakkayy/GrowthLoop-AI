@@ -17,12 +17,18 @@ type ProductGroup = {
 };
 
 type Props = {
-  userId: string;
+  apiBase: string;
   initialGroups: ProductGroup[];
   initialUngrouped: RefImage[];
+  columns?: number;
 };
 
-export default function ReferenceImages({ userId, initialGroups, initialUngrouped }: Props) {
+export default function ReferenceImages({
+  apiBase,
+  initialGroups,
+  initialUngrouped,
+  columns = 3,
+}: Props) {
   const [groups, setGroups] = useState<ProductGroup[]>(initialGroups);
   const [ungrouped, setUngrouped] = useState<RefImage[]>(initialUngrouped);
   const [activeId, setActiveId] = useState<string | "ungrouped">(
@@ -34,10 +40,17 @@ export default function ReferenceImages({ userId, initialGroups, initialUngroupe
   const [newGroupName, setNewGroupName] = useState("");
   const [saving, setSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const activeGroup = groups.find((g) => g.id === activeId) ?? null;
   const activeImages = activeId === "ungrouped" ? ungrouped : (activeGroup?.reference_images ?? []);
   const showUngroupedTab = ungrouped.length > 0;
+
+  const gridCols: Record<number, string> = {
+    3: "grid-cols-3",
+    4: "grid-cols-4",
+  };
+  const gridClass = gridCols[columns] ?? "grid-cols-3";
 
   async function handleUpload(files: FileList | null) {
     if (!files || files.length === 0) return;
@@ -49,7 +62,7 @@ export default function ReferenceImages({ userId, initialGroups, initialUngroupe
       formData.append("file", file);
       if (activeId !== "ungrouped" && activeId) formData.append("group_id", activeId);
 
-      const res = await fetch(`/api/admin/users/${userId}/reference-images`, { method: "POST", body: formData });
+      const res = await fetch(`${apiBase}/reference-images`, { method: "POST", body: formData });
       if (res.ok) {
         const newImage: RefImage = await res.json();
         if (activeId === "ungrouped" || !activeId) {
@@ -74,7 +87,7 @@ export default function ReferenceImages({ userId, initialGroups, initialUngroupe
   }
 
   async function handleDelete(imageId: string) {
-    const res = await fetch(`/api/admin/users/${userId}/reference-images/${imageId}`, { method: "DELETE" });
+    const res = await fetch(`${apiBase}/reference-images/${imageId}`, { method: "DELETE" });
     if (res.ok) {
       if (activeId === "ungrouped") {
         setUngrouped((prev) => prev.filter((img) => img.id !== imageId));
@@ -97,7 +110,7 @@ export default function ReferenceImages({ userId, initialGroups, initialUngroupe
     if (!newGroupName.trim()) return;
     setSaving(true);
     setError(null);
-    const res = await fetch(`/api/admin/users/${userId}/product-groups`, {
+    const res = await fetch(`${apiBase}/product-groups`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: newGroupName.trim() }),
@@ -116,7 +129,7 @@ export default function ReferenceImages({ userId, initialGroups, initialUngroupe
   }
 
   async function handleDeleteGroup(groupId: string) {
-    const res = await fetch(`/api/admin/users/${userId}/product-groups/${groupId}`, { method: "DELETE" });
+    const res = await fetch(`${apiBase}/product-groups/${groupId}`, { method: "DELETE" });
     if (res.ok) {
       const deleted = groups.find((g) => g.id === groupId);
       if (deleted?.reference_images.length) {
@@ -135,16 +148,16 @@ export default function ReferenceImages({ userId, initialGroups, initialUngroupe
   }
 
   return (
-    <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6">
+    <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6">
       <div className="mb-4">
-        <h2 className="text-base font-semibold text-zinc-50">Reference Images</h2>
+        <h2 className="text-base font-semibold text-zinc-50">Product Images</h2>
         <p className="text-[15px] text-zinc-500 mt-0.5">AI จะสุ่มเลือก 1 กลุ่มต่อวันเพื่อสร้างภาพ</p>
       </div>
 
       {error && <p className="text-sm text-red-400 mb-3">{error}</p>}
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 overflow-x-auto mb-4 border-b border-zinc-800">
+      <div className="flex items-center gap-1 overflow-x-auto pb-0 mb-4 border-b border-zinc-800">
         {groups.map((g) => (
           <button
             key={g.id}
@@ -161,7 +174,7 @@ export default function ReferenceImages({ userId, initialGroups, initialUngroupe
               <span
                 role="button"
                 onClick={(e) => { e.stopPropagation(); handleDeleteGroup(g.id); }}
-                className="ml-0.5 text-zinc-600 hover:text-red-400 transition-colors"
+                className="ml-0.5 text-zinc-600 hover:text-red-400 transition-colors leading-none"
                 title="ลบกลุ่ม"
               >
                 <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -189,6 +202,7 @@ export default function ReferenceImages({ userId, initialGroups, initialUngroupe
         {creatingGroup ? (
           <div className="flex items-center gap-1.5 px-2 py-1 -mb-px">
             <input
+              ref={nameInputRef}
               type="text"
               placeholder="ชื่อสินค้า..."
               value={newGroupName}
@@ -209,7 +223,7 @@ export default function ReferenceImages({ userId, initialGroups, initialUngroupe
             </button>
             <button
               onClick={() => { setCreatingGroup(false); setNewGroupName(""); }}
-              className="text-sm text-zinc-500 hover:text-zinc-300"
+              className="text-[15px] text-zinc-500 hover:text-zinc-300"
             >
               ยกเลิก
             </button>
@@ -217,7 +231,7 @@ export default function ReferenceImages({ userId, initialGroups, initialUngroupe
         ) : (
           <button
             onClick={() => { setCreatingGroup(true); setActiveId(""); }}
-            className="flex items-center gap-1 px-3 py-2 text-sm text-zinc-500 hover:text-violet-400 border-b-2 border-transparent -mb-px transition-colors whitespace-nowrap"
+            className="flex items-center gap-1 px-3 py-2 text-[15px] text-zinc-500 hover:text-violet-400 border-b-2 border-transparent -mb-px transition-colors whitespace-nowrap"
           >
             <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M8 3v10M3 8h10" />
@@ -245,7 +259,7 @@ export default function ReferenceImages({ userId, initialGroups, initialUngroupe
           <p className="text-[15px] text-zinc-500">คลิกเพื่ออัปโหลดรูปสินค้า</p>
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-2">
+        <div className={`grid ${gridClass} gap-2`}>
           {activeImages.map((img) => (
             <div key={img.id} className="relative group rounded-xl overflow-hidden border border-zinc-700 aspect-square">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -268,7 +282,7 @@ export default function ReferenceImages({ userId, initialGroups, initialUngroupe
           <button
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-700 text-sm text-zinc-500 hover:text-violet-400 hover:border-violet-500/40 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-700 text-[15px] text-zinc-500 hover:text-violet-400 hover:border-violet-500/40 disabled:opacity-50 transition-colors"
           >
             <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M8 3v10M3 8h10" />

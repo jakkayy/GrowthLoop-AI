@@ -1,20 +1,11 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { verifyAccessToken } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
-import Link from "next/link";
+import { getSession, logout } from "@/lib/getSession";
 import UserSidebar from "@/components/UserSidebar";
+import ReferenceImages from "@/components/ReferenceImages";
 import ScheduleForm from "./ScheduleForm";
 import CompetitorsSection from "./CompetitorsSection";
 import OwnPageInsightsSection from "./OwnPageInsightsSection";
-import ReferenceImages from "./ReferenceImages";
-
-async function logout() {
-  "use server";
-  const cookieStore = await cookies();
-  cookieStore.delete("access_token");
-  redirect("/login");
-}
 
 type User = {
   user_id: string;
@@ -54,17 +45,7 @@ type FacebookConnection = {
 };
 
 async function getUser(): Promise<User> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("access_token")?.value;
-  if (!token) redirect("/login");
-
-  let userId: string;
-  try {
-    const payload = verifyAccessToken(token);
-    userId = payload.userId;
-  } catch {
-    redirect("/login");
-  }
+  const { userId } = await getSession();
 
   const { data, error } = await supabase
     .from("users")
@@ -347,7 +328,7 @@ export default async function DashboardPage() {
               </div>
 
               {/* Reference Images */}
-              <ReferenceImages initialGroups={productGroups} initialUngrouped={ungroupedImages} />
+              <ReferenceImages apiBase="/api/user" initialGroups={productGroups} initialUngrouped={ungroupedImages} />
 
               {/* Account info (compact) */}
               <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-5">

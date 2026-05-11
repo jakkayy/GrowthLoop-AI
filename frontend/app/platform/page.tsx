@@ -1,37 +1,16 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import Link from "next/link";
+import { getSession, logout } from "@/lib/getSession";
 import UserSidebar from "@/components/UserSidebar";
-
-async function logout() {
-  "use server";
-  const cookieStore = await cookies();
-  cookieStore.delete("access_token");
-  redirect("/login");
-}
+import DraftStatusBadge, { PostStatus } from "@/components/DraftStatusBadge";
 
 type PostDraft = {
   id: string;
   caption: string;
   image_url: string | null;
-  status: "pending" | "sent" | "approved" | "denied" | "expired" | "posted";
+  status: PostStatus;
   sent_at: string | null;
   created_at: string;
 };
-
-async function getUserId(): Promise<string> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("access_token")?.value;
-  if (!token) redirect("/login");
-  try {
-    const { verifyAccessToken } = await import("@/lib/auth");
-    const payload = verifyAccessToken(token);
-    return payload.userId;
-  } catch {
-    redirect("/login");
-  }
-}
 
 async function getPostDrafts(userId: string): Promise<PostDraft[]> {
   const { data } = await supabase
@@ -41,24 +20,6 @@ async function getPostDrafts(userId: string): Promise<PostDraft[]> {
     .order("created_at", { ascending: false })
     .limit(50);
   return data ?? [];
-}
-
-const STATUS_CONFIG: Record<PostDraft["status"], { label: string; className: string }> = {
-  pending:  { label: "รอดำเนินการ", className: "bg-zinc-800 text-zinc-400 border border-zinc-700" },
-  sent:     { label: "ส่งแล้ว",     className: "bg-blue-500/10 text-blue-400 border border-blue-500/20" },
-  approved: { label: "อนุมัติแล้ว", className: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" },
-  denied:   { label: "ปฏิเสธ",      className: "bg-red-500/10 text-red-400 border border-red-500/20" },
-  expired:  { label: "หมดเวลา",     className: "bg-amber-500/10 text-amber-400 border border-amber-500/20" },
-  posted:   { label: "โพสต์แล้ว",   className: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" },
-};
-
-function StatusBadge({ status }: { status: PostDraft["status"] }) {
-  const cfg = STATUS_CONFIG[status];
-  return (
-    <span className={`text-sm font-medium px-2.5 py-1 rounded-full ${cfg.className}`}>
-      {cfg.label}
-    </span>
-  );
 }
 
 function formatDate(dateStr: string) {
@@ -84,7 +45,7 @@ function PostCard({ draft }: { draft: PostDraft }) {
         )}
       </div>
       <div className="flex items-center justify-between pt-1 border-t border-zinc-800">
-        <StatusBadge status={draft.status} />
+        <DraftStatusBadge status={draft.status} />
         <span className="text-[13px] text-zinc-600">{formatDate(draft.sent_at ?? draft.created_at)}</span>
       </div>
     </div>
@@ -101,7 +62,7 @@ function EmptyState({ text }: { text: string }) {
 }
 
 export default async function PlatformPage() {
-  const userId = await getUserId();
+  const { userId } = await getSession();
   const allDrafts = await getPostDrafts(userId);
 
   const lineDrafts = allDrafts;
@@ -111,20 +72,14 @@ export default async function PlatformPage() {
     <div className="flex h-screen overflow-hidden bg-zinc-950">
       <UserSidebar activePage="platform" logoutAction={logout} />
 
-      {/* ── Main ── */}
       <div className="flex-1 flex flex-col min-w-0">
-
-        {/* Top bar */}
         <header className="h-14 bg-zinc-950 border-b border-zinc-800 flex items-center px-6 gap-4 shrink-0">
           <div className="flex-1">
             <h1 className="text-base font-semibold text-zinc-200">Connect Platform</h1>
           </div>
         </header>
 
-        {/* Content */}
         <main className="flex-1 p-6 space-y-5 overflow-y-auto">
-
-          {/* Connect Buttons */}
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
             <h2 className="text-lg font-bold text-zinc-50 mb-1">เชื่อมต่อแพลตฟอร์ม</h2>
             <p className="text-[15px] text-zinc-500 mb-5">เลือกแพลตฟอร์มที่ต้องการเชื่อมต่อกับระบบ</p>
@@ -144,10 +99,7 @@ export default async function PlatformPage() {
             </div>
           </div>
 
-          {/* History */}
           <div className="grid grid-cols-2 gap-5">
-
-            {/* LINE History */}
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 flex flex-col">
               <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-800">
                 <div className="h-8 w-8 rounded-xl bg-[#06C755]/15 flex items-center justify-center text-[#06C755] text-sm font-bold border border-[#06C755]/20">L</div>
@@ -160,15 +112,12 @@ export default async function PlatformPage() {
                 </span>
               </div>
               <div className="p-4 flex flex-col gap-3 overflow-y-auto max-h-[600px]">
-                {lineDrafts.length === 0 ? (
-                  <EmptyState text="ยังไม่มีประวัติการส่งโพสต์ผ่าน LINE" />
-                ) : (
-                  lineDrafts.map((draft) => <PostCard key={draft.id} draft={draft} />)
-                )}
+                {lineDrafts.length === 0
+                  ? <EmptyState text="ยังไม่มีประวัติการส่งโพสต์ผ่าน LINE" />
+                  : lineDrafts.map((draft) => <PostCard key={draft.id} draft={draft} />)}
               </div>
             </div>
 
-            {/* Facebook History */}
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 flex flex-col">
               <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-800">
                 <div className="h-8 w-8 rounded-xl bg-[#1877F2]/15 flex items-center justify-center text-[#4a9eff] text-sm font-bold border border-[#1877F2]/20">f</div>
@@ -181,14 +130,11 @@ export default async function PlatformPage() {
                 </span>
               </div>
               <div className="p-4 flex flex-col gap-3 overflow-y-auto max-h-[600px]">
-                {facebookDrafts.length === 0 ? (
-                  <EmptyState text="ยังไม่มีโพสต์ที่เผยแพร่ไป Facebook" />
-                ) : (
-                  facebookDrafts.map((draft) => <PostCard key={draft.id} draft={draft} />)
-                )}
+                {facebookDrafts.length === 0
+                  ? <EmptyState text="ยังไม่มีโพสต์ที่เผยแพร่ไป Facebook" />
+                  : facebookDrafts.map((draft) => <PostCard key={draft.id} draft={draft} />)}
               </div>
             </div>
-
           </div>
         </main>
       </div>
