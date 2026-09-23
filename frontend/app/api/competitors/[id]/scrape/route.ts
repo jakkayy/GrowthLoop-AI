@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAccessToken } from "@/lib/auth";
+import { backendFetch } from "@/lib/backend";
 
 function getUserId(token: string): string | null {
   try {
@@ -24,9 +25,7 @@ export async function POST(
   const { id: competitorId } = await params;
   const { pageUrl } = (await req.json()) as { pageUrl: string };
 
-  const backendUrl = process.env.BACKEND_URL || "http://localhost:3001";
-
-  const res = await fetch(`${backendUrl}/competitors/${competitorId}/scrape`, {
+  const res = await backendFetch(`/competitors/${competitorId}/scrape`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ userId, pageUrl }),

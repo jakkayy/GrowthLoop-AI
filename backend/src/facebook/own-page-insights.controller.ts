@@ -1,6 +1,8 @@
-import { Controller, Post, Query, HttpCode, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Query, HttpCode, HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { InternalApiGuard } from '../auth/internal-api.guard';
 import { OwnPageInsightsService } from './own-page-insights.service';
 
+@UseGuards(InternalApiGuard)
 @Controller('facebook/own-page-insights')
 export class OwnPageInsightsController {
   constructor(private readonly service: OwnPageInsightsService) {}

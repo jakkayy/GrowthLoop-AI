@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AuthModule } from './auth/auth.module';
 import { AiModule } from './ai/ai.module';
 import { LineModule } from './line/line.module';
 import { ContentModule } from './content/content.module';
@@ -15,6 +16,7 @@ import { TestController } from './test.controller';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
+    AuthModule,
     AiModule,
     LineModule,
     ContentModule,
