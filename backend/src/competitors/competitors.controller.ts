@@ -7,10 +7,13 @@ import {
   Param,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { InternalApiGuard } from '../auth/internal-api.guard';
 import { CompetitorsService } from './competitors.service';
 import { AddCompetitorDto } from './dto/add-competitor.dto';
 
+@UseGuards(InternalApiGuard)
 @Controller('competitors')
 export class CompetitorsController {
   constructor(private readonly competitors: CompetitorsService) {}

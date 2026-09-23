@@ -1,7 +1,12 @@
-import { supabase } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase-admin";
 import { getSession, logout } from "@/lib/getSession";
 import UserSidebar from "@/components/UserSidebar";
 import DraftStatusBadge, { PostStatus } from "@/components/DraftStatusBadge";
+
+// Service-role client: this Server Component already resolves the
+// caller's session before touching the DB, so bypassing RLS here is
+// intentional.
+const supabase = createAdminClient();
 
 type PostDraft = {
   id: string;

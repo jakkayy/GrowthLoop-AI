@@ -11,6 +11,7 @@ type LinePostbackEvent = {
   type: 'postback';
   replyToken: string;
   postback: { data: string };
+  source: { type: string; userId?: string };
 };
 
 type LineEvent = LinePostbackEvent | { type: string };
@@ -91,17 +92,24 @@ export class LineService {
         const params = new URLSearchParams(postback.postback?.data ?? '');
         const action = params.get('action');
         const draftId = params.get('draftId');
+        const lineUserId = postback.source?.userId;
 
-        if (!draftId) continue;
+        if (!draftId || !lineUserId) continue;
 
         if (action === 'approve') {
           try {
-            await this.draftsService.approve(draftId);
+            const ok = await this.draftsService.approve(draftId, lineUserId);
             await this.replyText(
               postback.replyToken,
-              '✅ อนุมัติโพสต์แล้ว จะดำเนินการโพสต์ในเร็วๆ นี้',
+              ok
+                ? '✅ อนุมัติโพสต์แล้ว จะดำเนินการโพสต์ในเร็วๆ นี้'
+                : '⚠️ ไม่พบโพสต์นี้ หรืออนุมัติ/ปฏิเสธไปแล้ว',
             );
-            this.logger.log(`Draft ${draftId} approved`);
+            if (ok) this.logger.log(`Draft ${draftId} approved`);
+            else
+              this.logger.warn(
+                `Approve rejected for draft ${draftId}: not pending or not owned by ${lineUserId}`,
+              );
           } catch (err) {
             this.logger.error(`Failed to approve draft ${draftId}: ${err}`);
             await this.replyText(
@@ -111,9 +119,18 @@ export class LineService {
           }
         } else if (action === 'deny') {
           try {
-            await this.draftsService.deny(draftId);
-            await this.replyText(postback.replyToken, '🚫 ปฏิเสธโพสต์แล้ว');
-            this.logger.log(`Draft ${draftId} denied`);
+            const ok = await this.draftsService.deny(draftId, lineUserId);
+            await this.replyText(
+              postback.replyToken,
+              ok
+                ? '🚫 ปฏิเสธโพสต์แล้ว'
+                : '⚠️ ไม่พบโพสต์นี้ หรืออนุมัติ/ปฏิเสธไปแล้ว',
+            );
+            if (ok) this.logger.log(`Draft ${draftId} denied`);
+            else
+              this.logger.warn(
+                `Deny rejected for draft ${draftId}: not pending or not owned by ${lineUserId}`,
+              );
           } catch (err) {
             this.logger.error(`Failed to deny draft ${draftId}: ${err}`);
             await this.replyText(

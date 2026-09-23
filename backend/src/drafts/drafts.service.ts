@@ -51,24 +51,36 @@ export class DraftsService {
     if (error) throw new Error(error.message);
   }
 
-  async approve(draftId: string) {
-    const { error } = await this.supabase
+  /**
+   * @param lineUserId the LINE user who sent the postback — required so a
+   * forged (but signature-valid, since anyone with a LINE account can
+   * message our bot) postback can't approve/deny a draft that isn't theirs
+   * by guessing another user's draftId.
+   * @returns false if no matching pending draft owned by this LINE user
+   * was found (already handled, wrong owner, or unknown id).
+   */
+  async approve(draftId: string, lineUserId: string): Promise<boolean> {
+    const { count, error } = await this.supabase
       .from('post_drafts')
-      .update({ status: 'approved' })
+      .update({ status: 'approved' }, { count: 'exact' })
       .eq('id', draftId)
+      .eq('line_user_id', lineUserId)
       .eq('status', 'pending');
 
     if (error) throw new Error(error.message);
+    return (count ?? 0) > 0;
   }
 
-  async deny(draftId: string) {
-    const { error } = await this.supabase
+  async deny(draftId: string, lineUserId: string): Promise<boolean> {
+    const { count, error } = await this.supabase
       .from('post_drafts')
-      .update({ status: 'denied' })
+      .update({ status: 'denied' }, { count: 'exact' })
       .eq('id', draftId)
+      .eq('line_user_id', lineUserId)
       .eq('status', 'pending');
 
     if (error) throw new Error(error.message);
+    return (count ?? 0) > 0;
   }
 
   async expireOverdue() {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAccessToken } from "@/lib/auth";
+import { backendFetch } from "@/lib/backend";
 
 function getUserId(token: string): string | null {
   try {
@@ -18,7 +19,10 @@ export async function GET() {
   const userId = getUserId(token);
   if (!userId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-  const { supabase } = await import("@/lib/supabase");
+  // Service-role client: this route already verifies the caller's JWT
+  // before touching the DB, so bypassing RLS here is intentional.
+  const { createAdminClient } = await import("@/lib/supabase-admin");
+  const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("competitor_insights")
     .select("content, created_at")
@@ -42,9 +46,7 @@ export async function POST() {
   const userId = getUserId(token);
   if (!userId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-  const backendUrl = process.env.BACKEND_URL || "http://localhost:3001";
-
-  const res = await fetch(`${backendUrl}/competitors/analyze?userId=${userId}`, {
+  const res = await backendFetch(`/competitors/analyze?userId=${userId}`, {
     method: "POST",
   });
 
