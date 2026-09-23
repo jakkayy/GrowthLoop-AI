@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { verifyAccessToken } from "@/lib/auth";
+import { facebookGraphUrl } from "@/lib/facebook-api";
 
 // Service-role client: this route stores Facebook page access tokens,
 // which must never be reachable via the public anon key.
@@ -60,7 +61,7 @@ export async function GET(req: NextRequest) {
 
   // 1) แลก code เป็น user access token
   const tokenRes = await fetch(
-    `https://graph.facebook.com/v19.0/oauth/access_token?client_id=${appId}&redirect_uri=${encodeURIComponent(
+    `${facebookGraphUrl("oauth/access_token")}?client_id=${appId}&redirect_uri=${encodeURIComponent(
       redirectUri
     )}&client_secret=${appSecret}&code=${code}`
   );
@@ -79,14 +80,14 @@ export async function GET(req: NextRequest) {
   // 1.5) แลก short-lived token → long-lived token (~60 วัน)
   //       page token ที่ได้จาก long-lived token จะ never expire
   const longTokenRes = await fetch(
-    `https://graph.facebook.com/v19.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${shortLivedToken}`
+    `${facebookGraphUrl("oauth/access_token")}?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${shortLivedToken}`
   );
   const longTokenData = await longTokenRes.json();
   const userAccessToken: string = longTokenData.access_token ?? shortLivedToken;
 
   // 2) ดึงข้อมูล user Facebook
   const meRes = await fetch(
-    `https://graph.facebook.com/v19.0/me?fields=id,name&access_token=${userAccessToken}`
+    `${facebookGraphUrl("me")}?fields=id,name&access_token=${userAccessToken}`
   );
   const meData = (await meRes.json()) as FacebookMeResponse;
 
@@ -99,7 +100,7 @@ export async function GET(req: NextRequest) {
 
   // 3) ดึงรายชื่อเพจ
   const pagesRes = await fetch(
-    `https://graph.facebook.com/v19.0/me/accounts?access_token=${userAccessToken}`
+    `${facebookGraphUrl("me/accounts")}?access_token=${userAccessToken}`
   );
   const pagesData = (await pagesRes.json()) as FacebookPagesResponse;
 

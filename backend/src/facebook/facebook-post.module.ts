@@ -7,9 +7,10 @@ import { AutoReplyService } from './auto-reply.service';
 import { FacebookWebhookController } from './facebook-webhook.controller';
 import { FacebookSignatureGuard } from './facebook-signature.guard';
 import { AiModule } from '../ai/ai.module';
+import { LineModule } from '../line/line.module';
 
 @Module({
-  imports: [AiModule],
+  imports: [AiModule, LineModule],
   controllers: [OwnPageInsightsController, FacebookWebhookController],
   providers: [
     FacebookPostService,
@@ -18,6 +19,11 @@ import { AiModule } from '../ai/ai.module';
     AutoReplyService,
     FacebookSignatureGuard,
   ],
-  exports: [FacebookPostService, OwnPageInsightsService, EngagementReportService, AutoReplyService],
+  exports: [
+    FacebookPostService,
+    OwnPageInsightsService,
+    EngagementReportService,
+    AutoReplyService,
+  ],
 })
 export class FacebookPostModule {}
