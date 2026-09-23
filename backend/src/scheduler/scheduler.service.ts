@@ -1,11 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { ContentService } from '../content/content.service';
-import { LineService } from '../line/line.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { DraftsService } from '../drafts/drafts.service';
-import { FacebookPostService } from '../facebook/facebook-post.service';
 import { EngagementReportService } from '../facebook/engagement-report.service';
 import { CompetitorsService } from '../competitors/competitors.service';
+import {
+  CONTENT_GENERATION_QUEUE,
+  FACEBOOK_POST_QUEUE,
+} from '../queue/queue.constants';
+import type { ContentGenerationJobData } from './content-generation.processor';
+import type { FacebookPostJobData } from './facebook-post.processor';
 
 function currentHHMM(): string {
   const now = new Date();
@@ -33,16 +38,18 @@ export class SchedulerService {
   private readonly logger = new Logger(SchedulerService.name);
 
   constructor(
-    private readonly contentService: ContentService,
-    private readonly lineService: LineService,
     private readonly draftsService: DraftsService,
-    private readonly facebookPostService: FacebookPostService,
     private readonly engagementReportService: EngagementReportService,
     private readonly competitorsService: CompetitorsService,
+    @InjectQueue(CONTENT_GENERATION_QUEUE)
+    private readonly contentGenerationQueue: Queue<ContentGenerationJobData>,
+    @InjectQueue(FACEBOOK_POST_QUEUE)
+    private readonly facebookPostQueue: Queue<FacebookPostJobData>,
   ) {}
 
   // ทุก 1 นาที — เช็ค user ที่ถึงเวลา generate (และยังไม่ได้ generate วันนี้)
-  // แล้วส่ง LINE ให้อนุมัติ
+  // แล้ว enqueue งาน generate+ส่ง LINE (ทำจริงใน ContentGenerationProcessor
+  // ซึ่งมี retry/backoff ให้อัตโนมัติ)
   @Cron('* * * * *')
   async generateAndSendBySchedule() {
     const now = currentHHMM();
@@ -53,13 +60,15 @@ export class SchedulerService {
     if (targets.length === 0) return;
 
     this.logger.log(
-      `[${now}] Generating content for ${targets.length} user(s)`,
+      `[${now}] Queuing content generation for ${targets.length} user(s)`,
     );
 
     for (const user of targets) {
       // Claim today's slot atomically first — if another instance (or an
       // overlapping tick) already claimed it, skip. Not undone on failure
-      // below: a hard failure retries tomorrow, not this same minute.
+      // below: retrying the job itself is the queue's job now, but a claim
+      // that never even got enqueued (e.g. Redis briefly unreachable)
+      // retries tomorrow, not this same minute.
       const claimed = await this.draftsService.claimGeneration(
         user.user_id,
         today,
@@ -67,29 +76,21 @@ export class SchedulerService {
       if (!claimed) continue;
 
       try {
-        const { draftId, caption, imageUrl } =
-          await this.contentService.generateAndSave({
-            userId: user.user_id,
-            lineUserId: user.line_user_id,
-          });
-
-        this.logger.log(`Generated draft ${draftId} for user ${user.user_id}`);
-
-        await this.lineService.pushReviewFlex({
-          to: user.line_user_id,
-          draftId,
-          caption,
-          imageUrl,
+        await this.contentGenerationQueue.add('generate', {
+          userId: user.user_id,
+          lineUserId: user.line_user_id,
         });
-        await this.draftsService.markSent(draftId);
-        this.logger.log(`Sent draft ${draftId} to LINE`);
+        this.logger.log(`Queued generation for user ${user.user_id}`);
       } catch (err) {
-        this.logger.error(`Failed for user ${user.user_id}: ${String(err)}`);
+        this.logger.error(
+          `Failed to queue generation for user ${user.user_id}: ${String(err)}`,
+        );
       }
     }
   }
 
-  // ทุก 1 นาที — เช็ค user ที่ถึงเวลา post แล้วโพสต์ Facebook
+  // ทุก 1 นาที — เช็ค user ที่ถึงเวลา post แล้ว enqueue งานโพสต์ Facebook
+  // (ทำจริงใน FacebookPostProcessor ซึ่งมี retry/backoff ให้อัตโนมัติ)
   @Cron('* * * * *')
   async postBySchedule() {
     const now = currentHHMM();
@@ -98,7 +99,7 @@ export class SchedulerService {
     if (targets.length === 0) return;
 
     this.logger.log(
-      `[${now}] Posting ${targets.length} approved draft(s) to Facebook`,
+      `[${now}] Queuing ${targets.length} approved draft(s) for Facebook posting`,
     );
 
     for (const draft of targets) {
@@ -106,17 +107,17 @@ export class SchedulerService {
         const claimed = await this.draftsService.claimForPosting(draft.id);
         if (!claimed) continue; // อีก instance claim ไปก่อนแล้ว
 
-        const postId = await this.facebookPostService.postToPages({
+        await this.facebookPostQueue.add('post', {
+          draftId: draft.id,
           userId: draft.user_id,
           caption: draft.caption,
           imageUrl: draft.image_url,
         });
-        if (postId) {
-          await this.draftsService.savePostId(draft.id, postId);
-        }
-        this.logger.log(`Draft ${draft.id} posted successfully`);
+        this.logger.log(`Queued draft ${draft.id} for posting`);
       } catch (err) {
-        this.logger.error(`Failed to post draft ${draft.id}: ${String(err)}`);
+        this.logger.error(
+          `Failed to queue draft ${draft.id} for posting: ${String(err)}`,
+        );
       }
     }
   }
