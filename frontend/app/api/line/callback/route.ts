@@ -24,9 +24,19 @@ type LineProfileResponse = {
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
+  const state = req.nextUrl.searchParams.get("state");
+  const expectedState = req.cookies.get("line_oauth_state")?.value;
 
   if (!code) {
     return NextResponse.json({ error: "No code" }, { status: 400 });
+  }
+
+  // Reject unless this callback matches a flow *we* started via
+  // /api/line/login — otherwise an attacker's own OAuth code could be
+  // replayed against a logged-in victim to link the attacker's LINE
+  // account to the victim's account (CSRF / account-linking confusion).
+  if (!state || !expectedState || state !== expectedState) {
+    return NextResponse.json({ error: "Invalid or missing state" }, { status: 400 });
   }
 
   // ดึง user_id จาก JWT cookie
@@ -117,5 +127,7 @@ export async function GET(req: NextRequest) {
   }
 
   // 4) redirect กลับหน้า platform
-  return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/platform`);
+  const response = NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/platform`);
+  response.cookies.delete("line_oauth_state"); // one-time use
+  return response;
 }
