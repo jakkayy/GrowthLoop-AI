@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Query, Logger, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Logger, ForbiddenException, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AutoReplyService } from './auto-reply.service';
+import { FacebookSignatureGuard } from './facebook-signature.guard';
 
 @Controller('facebook/webhook')
 export class FacebookWebhookController {
@@ -27,6 +28,7 @@ export class FacebookWebhookController {
   }
 
   // Facebook ส่ง POST เมื่อมี event ใหม่
+  @UseGuards(FacebookSignatureGuard)
   @Post()
   async handleEvent(@Body() body: any) {
     const entries = body?.entry ?? [];
