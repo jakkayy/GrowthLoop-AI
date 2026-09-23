@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { signAccessToken } from "@/lib/auth";
 
 // Service-role client: this route reads password_hash to authenticate the
 // request, so it must never rely on the public anon key — RLS can't
 // distinguish "logging in" from any other anonymous caller.
 const supabase = createAdminClient();
-import { signAccessToken } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -14,8 +14,6 @@ export async function POST(req: Request) {
       email?: string;
       password?: string;
     };
-
-    console.log("LOGIN_REQUEST email:", email);
 
     if (!email || !password) {
       return NextResponse.json(
@@ -30,12 +28,13 @@ export async function POST(req: Request) {
       .eq("email", email)
       .maybeSingle();
 
-    console.log("LOGIN_QUERY_ERROR:", error);
-    console.log("LOGIN_USER:", user);
-
     if (error) {
+      // Never echo DB error details to the client — they can leak schema
+      // and query structure. Full detail goes to server logs only, and
+      // never includes the row itself (it has password_hash on it).
+      console.error("LOGIN_QUERY_ERROR:", error.message);
       return NextResponse.json(
-        { message: "Failed to query user", error: error.message },
+        { message: "Something went wrong, please try again" },
         { status: 500 }
       );
     }
@@ -48,18 +47,14 @@ export async function POST(req: Request) {
     }
 
     if (!user.password_hash || typeof user.password_hash !== "string") {
-      console.error("password_hash missing or invalid:", user.password_hash);
+      console.error(`User ${user.user_id} has no valid password_hash set`);
       return NextResponse.json(
         { message: "User password is not set correctly" },
         { status: 500 }
       );
     }
 
-    console.log("password_hash prefix:", user.password_hash.slice(0, 4));
-
     const passwordMatch = await bcrypt.compare(password, user.password_hash);
-
-    console.log("PASSWORD_MATCH:", passwordMatch);
 
     if (!passwordMatch) {
       return NextResponse.json(
@@ -75,8 +70,6 @@ export async function POST(req: Request) {
       email: user.email,
       role,
     });
-
-    console.log("TOKEN_CREATED");
 
     const response = NextResponse.json(
       {
@@ -103,10 +96,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("LOGIN_ERROR:", error);
     return NextResponse.json(
-      {
-        message: "Internal server error",
-        error: error instanceof Error ? error.message : String(error),
-      },
+      { message: "Internal server error" },
       { status: 500 }
     );
   }

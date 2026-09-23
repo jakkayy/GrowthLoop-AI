@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { signAccessToken } from "@/lib/auth";
 
 // Service-role client: this route creates the user row (with
 // password_hash) before any session exists, so it must never rely on the
 // public anon key.
 const supabase = createAdminClient();
-import { signAccessToken } from "@/lib/auth";
 
 type RegisterBody = {
     name?: string;
@@ -46,8 +46,9 @@ export async function POST(req: Request) {
         .maybeSingle();
 
         if (findError) {
+        console.error("REGISTER_FIND_USER_ERROR:", findError.message);
         return NextResponse.json(
-            { message: "Failed to check existing user", error: findError.message },
+            { message: "Something went wrong, please try again" },
             { status: 500 }
         );
         }
@@ -80,8 +81,9 @@ export async function POST(req: Request) {
         .single();
 
         if (insertError || !newUser) {
+        console.error("REGISTER_INSERT_ERROR:", insertError?.message);
         return NextResponse.json(
-            { message: "Failed to create user", error: insertError?.message },
+            { message: "Failed to create user" },
             { status: 500 }
         );
         }
