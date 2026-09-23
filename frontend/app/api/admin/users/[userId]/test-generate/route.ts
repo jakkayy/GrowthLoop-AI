@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAccessToken } from "@/lib/auth";
+import { backendFetch } from "@/lib/backend";
 
 export async function POST(
   req: Request,
@@ -20,12 +21,12 @@ export async function POST(
   const { userId } = await params;
   const { topic } = (await req.json()) as { topic?: string };
 
-  const backendUrl = process.env.BACKEND_URL ?? "http://localhost:3001";
-  const url = new URL(`${backendUrl}/test/preview`);
-  url.searchParams.set("userId", userId);
-  if (topic) url.searchParams.set("topic", topic);
+  const query = new URLSearchParams({ userId });
+  if (topic) query.set("topic", topic);
 
-  const res = await fetch(url.toString(), { method: "GET" });
+  const res = await backendFetch(`/test/preview?${query.toString()}`, {
+    method: "GET",
+  });
   const data = await res.json();
 
   if (!res.ok) return NextResponse.json(data, { status: res.status });

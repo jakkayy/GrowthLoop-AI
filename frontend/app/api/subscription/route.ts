@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAccessToken } from "@/lib/auth";
-import { supabase } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase-admin";
+
+// Service-role client: this route already verifies the caller's JWT
+// before touching the DB, so bypassing RLS here is intentional — the
+// anon key must never be trusted with writes to the users table.
+const supabase = createAdminClient();
 
 export async function PATCH(req: Request) {
   const cookieStore = await cookies();

@@ -1,8 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { InternalApiGuard } from '../auth/internal-api.guard';
 import { AiService } from './ai.service';
 import { GenerateCaptionDto } from './dto/generate-caption.dto';
 import { GenerateImageDto } from './dto/generate-image.dto';
 
+@UseGuards(InternalApiGuard)
 @Controller('ai')
 export class AiController {
   constructor(private readonly aiService: AiService) {}

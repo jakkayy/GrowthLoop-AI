@@ -1,11 +1,16 @@
 import { redirect } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase-admin";
 import { getSession, logout } from "@/lib/getSession";
 import UserSidebar from "@/components/UserSidebar";
 import ReferenceImages from "@/components/ReferenceImages";
 import ScheduleForm from "./ScheduleForm";
 import CompetitorsSection from "./CompetitorsSection";
 import OwnPageInsightsSection from "./OwnPageInsightsSection";
+
+// Service-role client: this Server Component already resolves the
+// caller's session before touching the DB, so bypassing RLS here is
+// intentional.
+const supabase = createAdminClient();
 
 type User = {
   user_id: string;

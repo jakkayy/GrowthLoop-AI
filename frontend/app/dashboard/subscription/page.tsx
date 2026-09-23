@@ -1,8 +1,13 @@
 import { redirect } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase-admin";
 import { getSession, logout } from "@/lib/getSession";
 import UserSidebar from "@/components/UserSidebar";
 import PlanSelector from "./PlanSelector";
+
+// Service-role client: this Server Component already resolves the
+// caller's session before touching the DB, so bypassing RLS here is
+// intentional.
+const supabase = createAdminClient();
 
 export default async function SubscriptionPage() {
   const { userId } = await getSession();
