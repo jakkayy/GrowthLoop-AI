@@ -19,7 +19,10 @@ export async function GET() {
   const userId = getUserId(token);
   if (!userId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-  const { supabase } = await import("@/lib/supabase");
+  // Service-role client: this route already verifies the caller's JWT
+  // before touching the DB, so bypassing RLS here is intentional.
+  const { createAdminClient } = await import("@/lib/supabase-admin");
+  const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("competitor_insights")
     .select("content, created_at")

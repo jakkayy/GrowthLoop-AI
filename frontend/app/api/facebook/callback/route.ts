@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase-admin";
 import { verifyAccessToken } from "@/lib/auth";
+
+// Service-role client: this route stores Facebook page access tokens,
+// which must never be reachable via the public anon key.
+const supabase = createAdminClient();
 
 type FacebookMeResponse = {
   id: string;

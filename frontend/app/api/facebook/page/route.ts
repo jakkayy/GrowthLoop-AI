@@ -1,14 +1,28 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { cookies } from "next/headers";
+import { verifyAccessToken } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase-admin";
+
+// Service-role client: this route already verifies the caller's JWT
+// before touching the DB, so bypassing RLS here is intentional.
+const supabase = createAdminClient();
 
 export async function GET() {
-  // ชั่วคราว: เปลี่ยนเป็น user_id จริงจาก session ภายหลัง
-  const TEST_USER_ID = "ใส่-user-id-ใน-db-ของคุณ";
+  const cookieStore = await cookies();
+  const token = cookieStore.get("access_token")?.value;
+  if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+
+  let userId: string;
+  try {
+    userId = verifyAccessToken(token).userId;
+  } catch {
+    return NextResponse.json({ message: "Invalid token" }, { status: 401 });
+  }
 
   const { data, error } = await supabase
     .from("facebook_pages")
     .select("id, page_id, page_name, category, tasks, is_selected, is_active")
-    .eq("user_id", TEST_USER_ID)
+    .eq("user_id", userId)
     .order("created_at", { ascending: true });
 
   if (error) {

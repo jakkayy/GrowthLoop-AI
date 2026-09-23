@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { supabase } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase-admin";
+
+// Service-role client: this route reads password_hash to authenticate the
+// request, so it must never rely on the public anon key — RLS can't
+// distinguish "logging in" from any other anonymous caller.
+const supabase = createAdminClient();
 import { signAccessToken } from "@/lib/auth";
 
 export async function POST(req: Request) {

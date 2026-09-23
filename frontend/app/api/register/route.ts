@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { supabase } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase-admin";
+
+// Service-role client: this route creates the user row (with
+// password_hash) before any session exists, so it must never rely on the
+// public anon key.
+const supabase = createAdminClient();
 import { signAccessToken } from "@/lib/auth";
 
 type RegisterBody = {

@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase-admin";
 import { verifyAccessToken } from "@/lib/auth";
+
+// Service-role client: this route already verifies the caller's JWT
+// before touching the DB, and it stores a LINE OAuth access token, which
+// must never be reachable via the public anon key.
+const supabase = createAdminClient();
 
 type LineTokenResponse = {
   access_token: string;
