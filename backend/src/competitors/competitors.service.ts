@@ -1,9 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import axios from 'axios';
 import { ApifyService, ApifyPost, ApifyComment } from './apify.service';
 import { AiService } from '../ai/ai.service';
+import { COMPETITOR_SCRAPE_QUEUE } from '../queue/queue.constants';
+import type { CompetitorScrapeJobData } from './competitor-scrape.processor';
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -42,6 +46,8 @@ export class CompetitorsService {
     private readonly config: ConfigService,
     private readonly apify: ApifyService,
     private readonly aiService: AiService,
+    @InjectQueue(COMPETITOR_SCRAPE_QUEUE)
+    private readonly scrapeQueue: Queue<CompetitorScrapeJobData>,
   ) {
     this.supabase = createClient(
       this.config.get<string>('SUPABASE_URL')!,
@@ -112,19 +118,33 @@ export class CompetitorsService {
     return data.id as string;
   }
 
+  /**
+   * Enqueues the actual scrape (see CompetitorScrapeProcessor) instead of
+   * running it inline fire-and-forget. Previously a failed scrape here
+   * was final — no retry, ever, for that job — since this method's own
+   * caller never awaited it. BullMQ now retries with backoff before
+   * CompetitorScrapeProcessor gives up and marks the job 'failed'.
+   */
   triggerScrape(
     jobId: string,
     competitorId: string,
     pageUrl: string,
     userId: string,
   ): void {
-    this.runScrape(jobId, competitorId, pageUrl, userId).catch((err) => {
-      this.logger.error(`Scrape job ${jobId} failed: ${String(err)}`);
-      this.failJob(jobId, String(err)).catch(() => {});
-    });
+    this.scrapeQueue
+      .add('scrape', { jobId, competitorId, pageUrl, userId })
+      .catch((err) => {
+        this.logger.error(
+          `Failed to enqueue scrape job ${jobId}: ${String(err)}`,
+        );
+        this.failJob(jobId, String(err)).catch(() => {});
+      });
   }
 
-  private async runScrape(
+  /** Runs the actual scrape. Public so CompetitorScrapeProcessor can call
+   * it; not meant to be called directly otherwise — go through
+   * triggerScrape() so the work happens on the queue. */
+  async runScrape(
     jobId: string,
     competitorId: string,
     pageUrl: string,
@@ -161,7 +181,9 @@ export class CompetitorsService {
     // 3. Run comments scraper (single run for all posts)
     if (recentPosts.length > 0) {
       const postUrls = recentPosts.map((p) => p.url).filter(Boolean);
-      this.logger.log(`[Job ${jobId}] Fetching comments for ${postUrls.length} posts`);
+      this.logger.log(
+        `[Job ${jobId}] Fetching comments for ${postUrls.length} posts`,
+      );
       const commentsRunId =
         await this.apify.runFacebookCommentsScraper(postUrls);
       const commentsDatasetId = await this.apify.pollUntilDone(commentsRunId);
@@ -170,7 +192,9 @@ export class CompetitorsService {
 
       // 4. Group comments by post URL
       const normalizeUrl = (url: string) =>
-        url?.replace(/^https?:\/\/(www\.|web\.)?facebook\.com/, '').split('?')[0];
+        url
+          ?.replace(/^https?:\/\/(www\.|web\.)?facebook\.com/, '')
+          .split('?')[0];
 
       const commentsByPost = new Map<string, ApifyComment[]>();
       for (const c of rawComments) {
@@ -184,13 +208,15 @@ export class CompetitorsService {
 
       groupedPosts = groupedPosts.map((post) => ({
         ...post,
-        comments: (commentsByPost.get(normalizeUrl(post.post_url)) ?? []).map((c) => ({
-          comment_id: c.commentId || c.id,
-          text: c.text || '',
-          author_name: c.profileName || '',
-          likes_count: c.likesCount || 0,
-          created_time: c.date,
-        })),
+        comments: (commentsByPost.get(normalizeUrl(post.post_url)) ?? []).map(
+          (c) => ({
+            comment_id: c.commentId || c.id,
+            text: c.text || '',
+            author_name: c.profileName || '',
+            likes_count: c.likesCount || 0,
+            created_time: c.date,
+          }),
+        ),
       }));
     }
 
@@ -359,7 +385,9 @@ export class CompetitorsService {
     this.logger.log(`[Insights] Saved for user ${userId}`);
   }
 
-  private async failJob(jobId: string, reason: string): Promise<void> {
+  /** Public so CompetitorScrapeProcessor can call it once BullMQ has
+   * exhausted retries for a scrape job. */
+  async failJob(jobId: string, reason: string): Promise<void> {
     await this.supabase
       .from('competitor_scrape_jobs')
       .update({
