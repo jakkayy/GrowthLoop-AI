@@ -3,6 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import axios from 'axios';
 import { resolveFacebookApiVersion } from './facebook-api.config';
+import { LineService } from '../line/line.service';
+
+// Facebook's OAuthException code for an invalid/expired access token.
+// https://developers.facebook.com/docs/graph-api/guides/error-handling
+const FACEBOOK_INVALID_TOKEN_ERROR_CODE = 190;
 
 export type OwnPost = {
   post_id: string;
@@ -20,7 +25,10 @@ export class FacebookPostService {
   private readonly supabase: SupabaseClient;
   private readonly apiVersion: string;
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    private readonly lineService: LineService,
+  ) {
     this.supabase = createClient(
       this.config.get<string>('SUPABASE_URL')!,
       this.config.get<string>('SUPABASE_SERVICE_ROLE_KEY')!,
@@ -93,12 +101,62 @@ export class FacebookPostService {
             `${page.page_id}_${res?.id}`) as string;
         }
       } catch (err: any) {
+        const fbError = err?.response?.data?.error;
         this.logger.error(
-          `Failed to post to page "${page.page_name}": ${err?.response?.data?.error?.message ?? err.message}`,
+          `Failed to post to page "${page.page_name}": ${fbError?.message ?? err.message}`,
         );
+
+        if (fbError?.code === FACEBOOK_INVALID_TOKEN_ERROR_CODE) {
+          await this.handleInvalidPageToken(
+            input.userId,
+            page.page_id,
+            page.page_name,
+          );
+        }
       }
     }
 
     return firstPostId;
+  }
+
+  /**
+   * The page's access token is dead (revoked, expired, or the user
+   * disconnected the app on Facebook's side). Deactivate it so we stop
+   * retrying with a token that will never work, and tell the customer via
+   * LINE so they know to reconnect — otherwise their scheduled posts would
+   * silently stop appearing with no visible error anywhere they'd see it.
+   * Deactivating also means this only fires once per broken page, not on
+   * every future posting attempt.
+   */
+  private async handleInvalidPageToken(
+    userId: string,
+    pageId: string,
+    pageName: string,
+  ) {
+    const { error: deactivateError } = await this.supabase
+      .from('facebook_pages')
+      .update({ is_active: false })
+      .eq('user_id', userId)
+      .eq('page_id', pageId);
+
+    if (deactivateError) {
+      this.logger.error(
+        `Failed to deactivate page "${pageName}" after invalid token: ${deactivateError.message}`,
+      );
+    }
+
+    const { data: connection } = await this.supabase
+      .from('line_connections')
+      .select('line_user_id')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (!connection?.line_user_id) return;
+
+    await this.lineService.pushText(
+      connection.line_user_id,
+      `⚠️ การเชื่อมต่อ Facebook Page "${pageName}" หมดอายุหรือถูกยกเลิก ระบบหยุดโพสต์ให้เพจนี้ชั่วคราว กรุณาเชื่อมต่อ Facebook ใหม่อีกครั้งในหน้าตั้งค่า`,
+    );
   }
 }

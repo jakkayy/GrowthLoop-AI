@@ -63,6 +63,28 @@ export class LineService {
     }
   }
 
+  /** Generic one-off push message, e.g. for system notices like "please
+   * reconnect your Facebook page" that aren't tied to a reply token. */
+  async pushText(to: string, text: string) {
+    try {
+      await axios.post(
+        'https://api.line.me/v2/bot/message/push',
+        {
+          to,
+          messages: [{ type: 'text', text }],
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+    } catch (error: any) {
+      this.logger.error(`Failed to push LINE text message: ${error?.message}`);
+    }
+  }
+
   async replyText(replyToken: string, text: string) {
     try {
       await axios.post(
