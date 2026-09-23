@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import axios from 'axios';
+import { resolveFacebookApiVersion } from './facebook-api.config';
 
 export type OwnPost = {
   post_id: string;
@@ -24,8 +25,7 @@ export class FacebookPostService {
       this.config.get<string>('SUPABASE_URL')!,
       this.config.get<string>('SUPABASE_SERVICE_ROLE_KEY')!,
     );
-    this.apiVersion =
-      this.config.get<string>('FACEBOOK_API_VERSION') || 'v19.0';
+    this.apiVersion = resolveFacebookApiVersion(this.config);
   }
 
   async getPagePosts(pageId: string, accessToken: string): Promise<OwnPost[]> {
@@ -44,15 +44,15 @@ export class FacebookPostService {
     );
 
     return (data.data ?? []).map((p: any) => ({
-      post_id:        p.id,
-      message:        p.message ?? '',
-      created_time:   p.created_time,
-      likes_count:    p.likes?.summary?.total_count ?? 0,
+      post_id: p.id,
+      message: p.message ?? '',
+      created_time: p.created_time,
+      likes_count: p.likes?.summary?.total_count ?? 0,
       comments_count: p.comments?.summary?.total_count ?? 0,
-      shares_count:   p.shares?.count ?? 0,
-      comments:       (p.comments?.data ?? []).map((c: any) => ({
-        text:         c.message ?? '',
-        author:       c.from?.name ?? '',
+      shares_count: p.shares?.count ?? 0,
+      comments: (p.comments?.data ?? []).map((c: any) => ({
+        text: c.message ?? '',
+        author: c.from?.name ?? '',
         created_time: c.created_time,
       })),
     }));
@@ -89,7 +89,8 @@ export class FacebookPostService {
         );
         this.logger.log(`Posted to Facebook page "${page.page_name}"`);
         if (!firstPostId) {
-          firstPostId = (res?.post_id ?? `${page.page_id}_${res?.id}`) as string;
+          firstPostId = (res?.post_id ??
+            `${page.page_id}_${res?.id}`) as string;
         }
       } catch (err: any) {
         this.logger.error(

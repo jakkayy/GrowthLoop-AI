@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import axios from 'axios';
 import { AiService } from '../ai/ai.service';
+import { resolveFacebookApiVersion } from './facebook-api.config';
 
 @Injectable()
 export class AutoReplyService {
@@ -18,8 +19,7 @@ export class AutoReplyService {
       this.config.get<string>('SUPABASE_URL')!,
       this.config.get<string>('SUPABASE_SERVICE_ROLE_KEY')!,
     );
-    this.apiVersion =
-      this.config.get<string>('FACEBOOK_API_VERSION') || 'v19.0';
+    this.apiVersion = resolveFacebookApiVersion(this.config);
   }
 
   async handleNewComment(input: {
