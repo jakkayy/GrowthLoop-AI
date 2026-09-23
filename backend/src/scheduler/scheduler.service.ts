@@ -18,6 +18,16 @@ function currentHHMM(): string {
   return formatter.format(now);
 }
 
+// "YYYY-MM-DD" in Asia/Bangkok — the calendar date used to decide whether
+// a daily job has already run today, independent of server/UTC timezone.
+function todayInBangkok(): string {
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Bangkok',
+  });
+  return formatter.format(now);
+}
+
 @Injectable()
 export class SchedulerService {
   private readonly logger = new Logger(SchedulerService.name);
@@ -31,12 +41,15 @@ export class SchedulerService {
     private readonly competitorsService: CompetitorsService,
   ) {}
 
-  // ทุก 1 นาที — เช็ค user ที่ถึงเวลา generate แล้วส่ง LINE ให้อนุมัติ
+  // ทุก 1 นาที — เช็ค user ที่ถึงเวลา generate (และยังไม่ได้ generate วันนี้)
+  // แล้วส่ง LINE ให้อนุมัติ
   @Cron('* * * * *')
   async generateAndSendBySchedule() {
     const now = currentHHMM();
-    const users = await this.draftsService.getAllActiveUsers();
-const targets = users.filter((u) => u.generate_time === now);
+    const today = todayInBangkok();
+    const pending =
+      await this.draftsService.getUsersPendingGenerationToday(today);
+    const targets = pending.filter((u) => u.generate_time <= now);
     if (targets.length === 0) return;
 
     this.logger.log(
@@ -44,6 +57,15 @@ const targets = users.filter((u) => u.generate_time === now);
     );
 
     for (const user of targets) {
+      // Claim today's slot atomically first — if another instance (or an
+      // overlapping tick) already claimed it, skip. Not undone on failure
+      // below: a hard failure retries tomorrow, not this same minute.
+      const claimed = await this.draftsService.claimGeneration(
+        user.user_id,
+        today,
+      );
+      if (!claimed) continue;
+
       try {
         const { draftId, caption, imageUrl } =
           await this.contentService.generateAndSave({
@@ -52,7 +74,7 @@ const targets = users.filter((u) => u.generate_time === now);
           });
 
         this.logger.log(`Generated draft ${draftId} for user ${user.user_id}`);
-        
+
         await this.lineService.pushReviewFlex({
           to: user.line_user_id,
           draftId,
@@ -106,11 +128,13 @@ const targets = users.filter((u) => u.generate_time === now);
   }
 
   // ทุก 1 นาที — ส่งรายงาน engagement รายวันให้ user ที่ถึงเวลา report_time
+  // (และยังไม่ได้ส่งวันนี้)
   @Cron('* * * * *')
   async sendDailyReportBySchedule() {
     const now = currentHHMM();
-    const users = await this.draftsService.getAllActiveUsers();
-    const targets = users.filter((u) => u.report_time === now);
+    const today = todayInBangkok();
+    const pending = await this.draftsService.getUsersPendingReportToday(today);
+    const targets = pending.filter((u) => u.report_time <= now);
     if (targets.length === 0) return;
 
     this.logger.log(
@@ -118,6 +142,9 @@ const targets = users.filter((u) => u.generate_time === now);
     );
 
     for (const user of targets) {
+      const claimed = await this.draftsService.claimReport(user.user_id, today);
+      if (!claimed) continue;
+
       try {
         await this.engagementReportService.sendDailyReport(
           user.user_id,
